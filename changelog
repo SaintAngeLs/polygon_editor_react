@@ -1,0 +1,8 @@
+# Changelog
+
+- update the ActioBar: added the DrawMode component;
+    - updated the ActionBar: added the drawable props to enable drawing polygans
+
+- updaing the Map.test.tsx:
+    - maing the drawable: false
+    - in casle of the test when the component will be prepared set the drawable to drawable: false  ???

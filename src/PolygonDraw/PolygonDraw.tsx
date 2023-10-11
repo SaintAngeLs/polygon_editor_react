@@ -1,0 +1,86 @@
+import React from 'react';
+
+import { Coordinate } from 'types';
+import { createLeafletLatLngTupleFromCoordinate } from '../helpers';
+
+import { MAP } from '../constants';
+import Map from './Map';
+import { usePolygonEditor } from './usePolygonEditor';
+
+export type Props<T extends Coordinate[] | Coordinate[][]> = {
+    boundary?: Coordinate[];
+    initialCenter?: Coordinate;
+    initialZoom?: number;
+    editable?: boolean;
+    drawable?: boolean;
+    onChange?: (polygon: T, isValid: boolean) => void;
+    polygon: T;
+    activeIndex?: number;
+    highlightedIndex?: number;
+    onClick?: (index: number) => void;
+    onMouseEnter?: (index: number) => void;
+    onMouseLeave?: (index: number) => void;
+};
+
+export function PolygonDraw<T extends Coordinate[] | Coordinate[][]>({
+    polygon,
+    activeIndex = 0,
+    highlightedIndex,
+    boundary,
+    initialCenter,
+    initialZoom,
+    editable = true,
+    drawable = true,
+    onChange,
+    onClick,
+    onMouseEnter,
+    onMouseLeave,
+}: Props<T>): React.ReactElement {
+    const {
+        polygons,
+        selection,
+        addPoint,
+        addPointToEdge,
+        setPolygon,
+        deselectAllPoints,
+        removePointFromSelection,
+        addPointsToSelection,
+        selectPoints,
+        moveSelectedPoints,
+        deletePolygonPoints,
+        selectAllPoints,
+        isPolygonClosed,
+        undo,
+        redo,
+    } = usePolygonEditor(onChange, polygon, activeIndex);
+
+    return (
+        <Map
+            selection={selection}
+            editable={editable}
+            drawable={drawable}
+            initialCenter={initialCenter ? createLeafletLatLngTupleFromCoordinate(initialCenter) : MAP.DEFAULT_CENTER}
+            initialZoom={initialZoom || MAP.DEFAULT_ZOOM}
+            boundaryPolygonCoordinates={boundary || MAP.WORLD_COORDINATES}
+            activePolygonIndex={activeIndex}
+            highlightedPolygonIndex={highlightedIndex}
+            polygonCoordinates={polygons}
+            setPolygon={setPolygon}
+            addPoint={addPoint}
+            addPointToEdge={addPointToEdge}
+            deselectAllPoints={deselectAllPoints}
+            removePointFromSelection={removePointFromSelection}
+            addPointsToSelection={addPointsToSelection}
+            selectPoints={selectPoints}
+            moveSelectedPoints={moveSelectedPoints}
+            deletePolygonPoints={deletePolygonPoints}
+            selectAllPoints={selectAllPoints}
+            isPolygonClosed={isPolygonClosed}
+            onClick={onClick}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
+            onUndo={undo}
+            onRedo={redo}
+        />
+    );
+}
