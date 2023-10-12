@@ -33,6 +33,8 @@ export interface Props {
     onEnableDrawMode: () => void;
     isDrawModeEnabled: boolean;
 
+    onAddVertex: () => void;
+
     onDelete: () => void;
     deleteInactive: boolean;
 
@@ -48,6 +50,7 @@ export const ActionBar: FunctionComponent<Props> = ({
     onEnableVectorMode,
     onEnableDrawMode,
     isDrawModeEnabled,
+    onAddVertex,
     onFocus,
     onDelete,
     onExport,
@@ -98,6 +101,9 @@ export const ActionBar: FunctionComponent<Props> = ({
                 </ActionButton>
             </>
         )}
+        <ActionButton onClick={onAddVertex} icon={ActionButtonIcons.ADD_VERTEX}>
+            {LABELS.ADD_VERTEX}
+        </ActionButton>
         <ActionButton onClick={onImport} icon={ActionButtonIcons.IMPORT}>
             {LABELS.IMPORT}
         </ActionButton>

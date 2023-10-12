@@ -14,6 +14,7 @@ import {
     getPolygonEdges,
     isCoordinateInPolygon,
     isPolygonClosed,
+    getMidPoint,
 } from '../helpers';
 import { Modal } from '../common/components/Modal';
 import { ExportPolygonForm } from '../conversion/ExportPolygonForm';
@@ -75,6 +76,7 @@ export interface State {
         endPosition: Coordinate;
         startTime: number;
     } | null;
+    selectedEdge:number | null;
     previousMouseMovePosition?: Coordinate;
     isPenToolActive: boolean;
     isDrawToolActive: boolean;
@@ -92,6 +94,7 @@ export class BaseMap extends React.Component<Props, State> {
         isMoveActive: false,
         rectangleSelection: null,
         previousMouseMovePosition: undefined,
+        selectedEdge: null,
         isPenToolActive: false,
         isDrawToolActive: false,
         newPointPosition: null,
@@ -406,6 +409,35 @@ export class BaseMap extends React.Component<Props, State> {
         }
     };
 
+    handleEdgeClick = (coordinate: Coordinate, index: number) => {
+        if (this.state.selectedEdge === index) {
+            // If the same edge is clicked, add a vertex in the middle of the edge.
+            this.handleAddVertexInMiddleOfEdge();
+        } else {
+            // Otherwise, just set the clicked edge as the selected edge.
+            this.setState({ selectedEdge: index });
+        }
+    };
+    
+
+    handleAddVertexInMiddleOfEdge = () => {
+        if (this.state.selectedEdge === null) {
+            console.error("No edge selected to add a vertex.");
+            return;
+        }
+    
+        const activePolygon = this.props.polygonCoordinates[this.props.activePolygonIndex];
+        const startPoint = activePolygon[this.state.selectedEdge];
+        const endPoint = activePolygon[(this.state.selectedEdge + 1) % activePolygon.length];
+        const midpoint = getMidPoint(startPoint, endPoint);
+    
+        this.props.addPointToEdge(midpoint, this.state.selectedEdge);
+        this.setState({
+            selectedEdge: null
+        });
+    };
+
+    
     ///////////////////////////////////////////////////////////////////////////
     //                      Keyboard handling methods                        //
     ///////////////////////////////////////////////////////////////////////////
@@ -482,10 +514,20 @@ export class BaseMap extends React.Component<Props, State> {
     renderVertexEdge = (coordinate: Coordinate, index: number) => (
         <EdgeVertex key={index} index={index} coordinate={coordinate} onClick={this.props.addPointToEdge} />
     );
+    // the olde version with not fincvtionalitu to work with the adding the vertexe to the middle of the
+    // renderPolygonEdges = () => {
+    //     return getPolygonEdges(this.props.polygonCoordinates[this.props.activePolygonIndex]).map(this.renderVertexEdge);
+    // };
 
+    // the new wersion of the renderVertexEdge
     renderPolygonEdges = () => {
-        return getPolygonEdges(this.props.polygonCoordinates[this.props.activePolygonIndex]).map(this.renderVertexEdge);
+        return getPolygonEdges(this.props.polygonCoordinates[this.props.activePolygonIndex]).map((coordinate, index) => (
+            <EdgeVertex key={index} index={index} coordinate={coordinate} onClick={this.handleEdgeClick} />
+        ));
     };
+    
+    
+
 
     renderInactivePolygons = () => {
         const activePolygonIsClosed = isPolygonClosed(this.props.polygonCoordinates[this.props.activePolygonIndex]);
@@ -615,6 +657,7 @@ export class BaseMap extends React.Component<Props, State> {
                     isDrawModeEnabled={isDrawToolActive}
                     onDelete={this.props.deletePolygonPoints}
                     onFocus={this.handleOnFocusClicked}
+                    onAddVertex={this.handleAddVertexInMiddleOfEdge}
                     onEnableDrawMode={this.toggleDrawMode}
                     onEnableVectorMode={this.toggleVectorMode}
                     deleteInactive={selection.size === 0}

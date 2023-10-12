@@ -9,11 +9,13 @@ import { VectorMode } from './Icons/VectorMode';
 import { Export } from './Icons/Export';
 import { Import } from './Icons/Import';
 import { DrawMode } from './Icons/DrawMode';
+import { AddVertex } from './Icons/AddVertex';
 
 export enum ActionButtonIcons {
     TRASHCAN = 'TRASHCAN',
     FRAME = 'FRAME',
     VECTOR_MODE = 'VECTOR_MODE',
+    ADD_VERTEX = 'ADD_VERTEX',
     DRAW_MODE = 'DRAW_MODE',
     EXPORT = 'EXPORT',
     IMPORT = 'IMPORT',
@@ -64,6 +66,8 @@ const renderIcon = (icon: ActionButtonIcons, inactive?: boolean, activeIconColor
             return <Frame {...props} />;
         case ActionButtonIcons.VECTOR_MODE:
             return <VectorMode {...props} />;
+        case ActionButtonIcons.ADD_VERTEX:
+            return <AddVertex {...props} />;
         case ActionButtonIcons.DRAW_MODE:
             return <DrawMode {...props} />;
         case ActionButtonIcons.EXPORT:
