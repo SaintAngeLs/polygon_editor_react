@@ -28,6 +28,7 @@ import { PolygonVertex } from './PolygonVertex';
 import { BoundaryPolygon } from './BoundaryPolygon';
 import { Polygon } from './Polygon';
 import MapInner from './MapInner';
+import { EdgeConstraintsBar } from '../ActionBar/EdgeConstraintsBar';
 
 interface MapSnapshot {
     reframe: boolean;
@@ -78,12 +79,16 @@ export interface State {
     } | null;
     selectedEdge:number | null;
     previousMouseMovePosition?: Coordinate;
+    edgeRestrictions: EdgeRestriction;
     isPenToolActive: boolean;
     isDrawToolActive: boolean;
     newPointPosition: Coordinate | null;
     showExportPolygonModal: boolean;
     showImportPolygonModal: boolean;
 }
+
+export type EdgeRestriction = 'horizontal' | 'vertical' | null;
+
 
 export class BaseMap extends React.Component<Props, State> {
     private map: MapType | null = null;
@@ -95,6 +100,7 @@ export class BaseMap extends React.Component<Props, State> {
         rectangleSelection: null,
         previousMouseMovePosition: undefined,
         selectedEdge: null,
+        edgeRestrictions: null,
         isPenToolActive: false,
         isDrawToolActive: false,
         newPointPosition: null,
@@ -418,6 +424,8 @@ export class BaseMap extends React.Component<Props, State> {
             this.setState({ selectedEdge: index });
         }
     };
+
+    
     
 
     handleAddVertexInMiddleOfEdge = () => {
@@ -436,6 +444,14 @@ export class BaseMap extends React.Component<Props, State> {
             selectedEdge: null
         });
     };
+
+    handleSetHorizontal = () => {
+        this.setState({ edgeRestrictions: 'horizontal' });
+    }
+    
+    handleSetVertical = () => {
+        this.setState({ edgeRestrictions: 'vertical' });
+    }
 
     
     ///////////////////////////////////////////////////////////////////////////
@@ -663,6 +679,10 @@ export class BaseMap extends React.Component<Props, State> {
                     deleteInactive={selection.size === 0}
                     onExport={this.handleExportPolygonActionClicked}
                     onImport={this.handleImportPolygonActionClicked}
+                />
+                 <EdgeConstraintsBar 
+                    onSetHorizontal={this.handleSetHorizontal} 
+                    onSetVertical={this.handleSetVertical} 
                 />
 
                 {this.state.showExportPolygonModal && (
