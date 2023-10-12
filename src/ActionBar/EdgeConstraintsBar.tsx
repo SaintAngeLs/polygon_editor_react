@@ -3,10 +3,13 @@ import styled from 'styled-components';
 
 const Container = styled.div`
     position: absolute;
+    background-color: #fff;
     right: 0;
-    top: 64px;  // Adjusted to avoid overlapping with ActionBar
-    display: flex;
+    top: 64px;  
+    border-radius: 5px;
     padding-right: 8px;
+    display: block;
+    margin-right: 8px;
     padding-left: 8px;
     > * {
         margin-left: 8px;
