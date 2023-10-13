@@ -4,7 +4,7 @@ import { Coordinate } from 'types';
 import { createLeafletLatLngTupleFromCoordinate } from '../helpers';
 
 import { MAP } from '../constants';
-import Map from './Map';
+import Map, { EdgeRestriction } from './Map';
 import { usePolygonEditor } from './usePolygonEditor';
 
 export type Props<T extends Coordinate[] | Coordinate[][]> = {
@@ -17,6 +17,7 @@ export type Props<T extends Coordinate[] | Coordinate[][]> = {
     polygon: T;
     activeIndex?: number;
     highlightedIndex?: number;
+    setEdgeRestriction: (restriction: EdgeRestriction) => void;
     onClick?: (index: number) => void;
     onMouseEnter?: (index: number) => void;
     onMouseLeave?: (index: number) => void;
@@ -42,6 +43,7 @@ export function PolygonDraw<T extends Coordinate[] | Coordinate[][]>({
         addPoint,
         addPointToEdge,
         setPolygon,
+        setEdgeRestriction,
         deselectAllPoints,
         removePointFromSelection,
         addPointsToSelection,
@@ -67,6 +69,7 @@ export function PolygonDraw<T extends Coordinate[] | Coordinate[][]>({
             polygonCoordinates={polygons}
             setPolygon={setPolygon}
             addPoint={addPoint}
+            setEdgeRestriction={setEdgeRestriction} 
             addPointToEdge={addPointToEdge}
             deselectAllPoints={deselectAllPoints}
             removePointFromSelection={removePointFromSelection}

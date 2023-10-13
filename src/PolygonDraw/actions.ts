@@ -1,5 +1,6 @@
 import { createAction } from '../actionUtils';
 import { ActionsUnion, Coordinate } from '../types';
+import { EdgeRestriction } from './Map';
 
 // Selection actions
 export const SELECT_POINTS = 'POLYGON_DRAW/SELECT_POINTS';
@@ -21,6 +22,7 @@ export const ADD_POINT_TO_EDGE = 'POLYGON_DRAW/ADD_POINT_TO_EDGE';
 // Change polygon actions
 export const CHANGE_POLYGON = 'POLYGON_DRAW/CHANGE_POLYGON';
 export const SET_POLYGON = 'POLYGON_DRAW/SET_POLYGON';
+export const SET_EDGE_RESTRICTION = 'POLYGON_DRAW/SET_EDGE_RESTRICTION';
 
 export const actions = {
     // Selections action creators
@@ -29,6 +31,10 @@ export const actions = {
     removePointFromSelection: (index: number) => createAction(REMOVE_POINT_FROM_SELECTION, index),
     selectAllPoints: () => createAction(SELECT_ALL_POINTS),
     deselectAllPoints: () => createAction(DESELECT_ALL_POINTS),
+
+    // Add the actio creator for the addRestrictions
+    setEdgeRestriction: (restriction: EdgeRestriction) =>
+        createAction(SET_EDGE_RESTRICTION, restriction),
 
     // Move action creator
     moveSelectedPoints: (movement: Coordinate) => createAction(MOVE_SELECTED_POINTS, movement),

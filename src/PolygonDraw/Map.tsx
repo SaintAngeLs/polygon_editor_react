@@ -53,6 +53,7 @@ export interface Props {
     onMouseEnter?: (index: number) => void;
     onMouseLeave?: (index: number) => void;
     addPoint: (coord: Coordinate) => void;
+    setEdgeRestriction: (restriction: EdgeRestriction) => void;
     addPointToEdge: (coordinate: Coordinate, index: number) => void;
     deselectAllPoints: () => void;
     removePointFromSelection: (index: number) => void;
@@ -403,6 +404,8 @@ export class BaseMap extends React.Component<Props, State> {
                 this.setState({ isMovedPointInBoundary: false });
             }
         }
+
+        
     };
 
     endVertexMove = () => {
@@ -437,7 +440,28 @@ export class BaseMap extends React.Component<Props, State> {
         const activePolygon = this.props.polygonCoordinates[this.props.activePolygonIndex];
         const startPoint = activePolygon[this.state.selectedEdge];
         const endPoint = activePolygon[(this.state.selectedEdge + 1) % activePolygon.length];
-        const midpoint = getMidPoint(startPoint, endPoint);
+        // const midpoint = getMidPoint(startPoint, endPoint);
+    
+        // this.props.addPointToEdge(midpoint, this.state.selectedEdge);
+        // this.setState({
+        //     selectedEdge: null
+        // });
+
+        let midpoint;
+
+        if (this.state.edgeRestrictions === 'horizontal') {
+            midpoint = {
+                latitude: (startPoint.latitude + endPoint.latitude) / 2,
+                longitude: startPoint.longitude  // Keeps the longitude unchanged to ensure a horizontal edge.
+            };
+        } else if (this.state.edgeRestrictions === 'vertical') {
+            midpoint = {
+                latitude: startPoint.latitude,  // Keeps the latitude unchanged to ensure a vertical edge.
+                longitude: (startPoint.longitude + endPoint.longitude) / 2
+            };
+        } else {
+            midpoint = getMidPoint(startPoint, endPoint);  // Assuming getMidPoint() returns a Coordinate object with latitude and longitude.
+        }
     
         this.props.addPointToEdge(midpoint, this.state.selectedEdge);
         this.setState({
@@ -446,11 +470,17 @@ export class BaseMap extends React.Component<Props, State> {
     };
 
     handleSetHorizontal = () => {
-        this.setState({ edgeRestrictions: 'horizontal' });
+        this.setState({ edgeRestrictions: 'horizontal' }, () => {
+            // Call the function to set the edge restriction in the parent component
+            this.props.setEdgeRestriction('horizontal');
+        });
     }
     
     handleSetVertical = () => {
-        this.setState({ edgeRestrictions: 'vertical' });
+        this.setState({ edgeRestrictions: 'vertical' }, () => {
+            // Call the function to set the edge restriction in the parent component
+            this.props.setEdgeRestriction('vertical');
+        });
     }
 
     
