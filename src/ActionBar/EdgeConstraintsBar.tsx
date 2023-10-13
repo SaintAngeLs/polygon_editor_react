@@ -11,15 +11,20 @@ const Container = styled.div`
     display: block;
     margin-right: 8px;
     padding-left: 8px;
+    padding: 10px;
     > * {
         margin-left: 8px;
     }
 `;
 
-const CheckboxLabel = styled.label`
+const RadioButtonLabel = styled.label`
     display: flex;
     align-items: center;
     margin-right: 10px;
+
+    input {
+        margin-right: 10px;
+    }
 `;
 
 export interface EdgeConstraintsBarProps {
@@ -28,39 +33,38 @@ export interface EdgeConstraintsBarProps {
 }
 
 export const EdgeConstraintsBar: FunctionComponent<EdgeConstraintsBarProps> = ({ onSetHorizontal, onSetVertical }) => {
-    const [isHorizontal, setIsHorizontal] = useState(false);
-    const [isVertical, setIsVertical] = useState(false);
+    const [selectedEdge, setSelectedEdge] = useState<string | null>(null);
 
-    const handleHorizontalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (isVertical) return;  // Do not allow both to be checked
-        setIsHorizontal(e.target.checked);
-        onSetHorizontal(e.target.checked);
-    }
+    const handleEdgeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const edge = e.target.value;
+        setSelectedEdge(edge);
 
-    const handleVerticalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (isHorizontal) return;  // Do not allow both to be checked
-        setIsVertical(e.target.checked);
-        onSetVertical(e.target.checked);
+        onSetHorizontal(edge === 'horizontal');
+        onSetVertical(edge === 'vertical');
     }
 
     return (
         <Container>
-            <CheckboxLabel>
+            <RadioButtonLabel>
                 <input 
-                    type="checkbox" 
-                    checked={isHorizontal} 
-                    onChange={handleHorizontalChange}
+                    type="radio" 
+                    value="horizontal"
+                    checked={selectedEdge === 'horizontal'} 
+                    onChange={handleEdgeChange}
+                    name="edgeDirection"
                 />
                 Horizontal Edge
-            </CheckboxLabel>
-            <CheckboxLabel>
+            </RadioButtonLabel>
+            <RadioButtonLabel>
                 <input 
-                    type="checkbox" 
-                    checked={isVertical} 
-                    onChange={handleVerticalChange}
+                    type="radio" 
+                    value="vertical"
+                    checked={selectedEdge === 'vertical'} 
+                    onChange={handleEdgeChange}
+                    name="edgeDirection"
                 />
                 Vertical Edge
-            </CheckboxLabel>
+            </RadioButtonLabel>
         </Container>
     );
 }
