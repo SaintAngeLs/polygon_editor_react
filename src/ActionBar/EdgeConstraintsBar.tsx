@@ -11,11 +11,22 @@ const Container = styled.div`
     display: block;
     margin-right: 8px;
     padding-left: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 10px;
     > * {
         margin-left: 8px;
     }
 `;
+
+const Title = styled.div`
+    font-size: 1.2em;
+    color: #333;
+    font-weight: 600;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+`;
+
 
 const RadioButtonLabel = styled.label`
     display: flex;
@@ -39,12 +50,28 @@ export const EdgeConstraintsBar: FunctionComponent<EdgeConstraintsBarProps> = ({
         const edge = e.target.value;
         setSelectedEdge(edge);
 
-        onSetHorizontal(edge === 'horizontal');
-        onSetVertical(edge === 'vertical');
+        if (edge === 'none') {
+            onSetHorizontal(false);
+            onSetVertical(false);
+        } else {
+            onSetHorizontal(edge === 'horizontal');
+            onSetVertical(edge === 'vertical');
+        }
     }
 
     return (
         <Container>
+            <Title> Restrictions </Title>
+            <RadioButtonLabel>
+                <input 
+                    type="radio" 
+                    value="None"
+                    checked={selectedEdge === 'none'} 
+                    onChange={handleEdgeChange}
+                    name="edgeDirection"
+                />
+                None
+            </RadioButtonLabel>
             <RadioButtonLabel>
                 <input 
                     type="radio" 

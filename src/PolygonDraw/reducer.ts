@@ -32,7 +32,7 @@ export interface PolygonEditState {
 export const polygonEditReducer = (state: PolygonEditState, action: Actions): PolygonEditState => {
     switch (action.type) {
         ///////////////////////////////////////////////////////////////////////////////////
-        ///                            CHANGE POLYGON CASES                             ///
+        ///                            CHANGE POLYGON CASES and ADDING RESTRICTIONS                             ///
         ///////////////////////////////////////////////////////////////////////////////////
         case CHANGE_POLYGON: {
             return {
@@ -54,7 +54,7 @@ export const polygonEditReducer = (state: PolygonEditState, action: Actions): Po
         case SET_EDGE_RESTRICTION: {
             return {
                 ...state,
-                edgeRestriction: action.payload, // Update the edge restriction in the state
+                edgeRestriction: action.payload, 
             };
         }
 
