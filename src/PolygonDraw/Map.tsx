@@ -464,6 +464,7 @@ export class BaseMap extends React.Component<Props, State> {
         }
     
         this.props.addPointToEdge(midpoint, this.state.selectedEdge);
+
         this.setState({
             selectedEdge: null
         });
@@ -558,7 +559,13 @@ export class BaseMap extends React.Component<Props, State> {
     };
 
     renderVertexEdge = (coordinate: Coordinate, index: number) => (
-        <EdgeVertex key={index} index={index} coordinate={coordinate} onClick={this.props.addPointToEdge} />
+        <EdgeVertex 
+            key={index} 
+                index={index} 
+                coordinate={coordinate} 
+                onClick={this.props.addPointToEdge} 
+                edgeRestriction={this.state.edgeRestrictions}
+            />
     );
     // the olde version with not fincvtionalitu to work with the adding the vertexe to the middle of the
     // renderPolygonEdges = () => {
@@ -568,7 +575,13 @@ export class BaseMap extends React.Component<Props, State> {
     // the new wersion of the renderVertexEdge
     renderPolygonEdges = () => {
         return getPolygonEdges(this.props.polygonCoordinates[this.props.activePolygonIndex]).map((coordinate, index) => (
-            <EdgeVertex key={index} index={index} coordinate={coordinate} onClick={this.handleEdgeClick} />
+            <EdgeVertex
+                key={index}
+                index={index}
+                coordinate={coordinate}
+                onClick={this.handleEdgeClick}
+                edgeRestriction={this.state.edgeRestrictions} 
+            />
         ));
     };
     
