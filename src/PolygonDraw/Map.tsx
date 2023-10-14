@@ -88,7 +88,7 @@ export interface State {
     showImportPolygonModal: boolean;
 }
 
-export type EdgeRestriction = 'horizontal' | 'vertical' | null;
+export type EdgeRestriction = 'horizontal' | 'vertical' | 'none' | null;
 
 
 export class BaseMap extends React.Component<Props, State> {

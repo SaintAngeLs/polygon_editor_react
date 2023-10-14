@@ -47,15 +47,19 @@ export const EdgeConstraintsBar: FunctionComponent<EdgeConstraintsBarProps> = ({
     const [selectedEdge, setSelectedEdge] = useState<string | null>(null);
 
     const handleEdgeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+
         const edge = e.target.value;
         setSelectedEdge(edge);
 
         if (edge === 'none') {
             onSetHorizontal(false);
             onSetVertical(false);
-        } else {
-            onSetHorizontal(edge === 'horizontal');
-            onSetVertical(edge === 'vertical');
+        } else if (edge === 'horizontal') {
+            onSetHorizontal(true);
+            onSetVertical(false);
+        } else if (edge === 'vertical') {
+            onSetHorizontal(false);
+            onSetVertical(true);
         }
     }
 
@@ -65,7 +69,7 @@ export const EdgeConstraintsBar: FunctionComponent<EdgeConstraintsBarProps> = ({
             <RadioButtonLabel>
                 <input 
                     type="radio" 
-                    value="None"
+                    value="none"
                     checked={selectedEdge === 'none'} 
                     onChange={handleEdgeChange}
                     name="edgeDirection"
