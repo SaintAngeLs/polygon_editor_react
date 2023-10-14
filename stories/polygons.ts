@@ -2,38 +2,50 @@ import { Coordinate } from '../src/types';
 
 export const POLYGON: Coordinate[] = [
     {
-        latitude: 53.56545917520555,
-        longitude: 10.0412155687809,
+      "latitude": 53.56545917520555,
+      "longitude": 10.0412155687809
     },
     {
-        latitude: 53.56586697476003,
-        longitude: 10.018899589776995,
+      "latitude": 53.56586697476003,
+      "longitude": 10.018899589776995
     },
     {
-        latitude: 53.58380626282291,
-        longitude: 10.005166679620745,
+      "latitude": 53.58380626282291,
+      "longitude": 10.005166679620745
     },
     {
-        latitude: 53.56668256207333,
-        longitude: 9.993150383234026,
+      "latitude": 53.56668256207333,
+      "longitude": 9.993150383234026
     },
     {
-        latitude: 53.56647866671947,
-        longitude: 9.961908012628557,
+      "latitude": 53.56590195824798,
+      "longitude": 9.967552318581115
     },
     {
-        latitude: 53.555466857846014,
-        longitude: 9.979417473077776,
+      "latitude": 53.557835385275894,
+      "longitude": 9.988566724100538
     },
     {
-        latitude: 53.55505895802228,
-        longitude: 10.02576604485512,
+      "latitude": 53.54443307367735,
+      "longitude": 9.980509919391151
     },
     {
-        latitude: 53.56545917520555,
-        longitude: 10.0412155687809,
+      "latitude": 53.55091198890709,
+      "longitude": 10.005494702540156
     },
-];
+    {
+      "latitude": 53.54585180495961,
+      "longitude": 10.033938899014835
+    },
+    {
+      "latitude": 53.557798955455596,
+      "longitude": 10.02115349375403
+    },
+    {
+      "latitude": 53.56545917520555,
+      "longitude": 10.0412155687809
+    }
+  ];
 
 export const POLYGON_ONE = [
     { longitude: 9.99927520751953, latitude: 53.61511726495334 },

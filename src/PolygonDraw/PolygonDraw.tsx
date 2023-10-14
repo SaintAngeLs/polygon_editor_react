@@ -17,7 +17,7 @@ export type Props<T extends Coordinate[] | Coordinate[][]> = {
     polygon: T;
     activeIndex?: number;
     highlightedIndex?: number;
-    setEdgeRestriction: (restriction: EdgeRestriction) => void;
+    setEdgeRestriction?: (restriction: EdgeRestriction) => void;
     onClick?: (index: number) => void;
     onMouseEnter?: (index: number) => void;
     onMouseLeave?: (index: number) => void;
