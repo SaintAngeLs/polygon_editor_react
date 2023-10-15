@@ -4,6 +4,7 @@ import { LatLngTuple } from 'leaflet';
 export const LABELS = {
     DRAW: 'Draw',
     PEN: 'Pen',
+    ADD_VERTEX: 'Vertex',
     DELETE: 'Delete',
     FOCUS: 'Focus',
     EXPORT: 'Export',

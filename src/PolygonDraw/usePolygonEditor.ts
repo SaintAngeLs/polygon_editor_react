@@ -7,6 +7,7 @@ import { ensurePolygonList, isPolygonClosed, isPolygonList } from '../helpers';
 import { PolygonEditState, undoablePolygonEditReducer } from './reducer';
 import { isValidPolygon } from './validators';
 import { ActionCreators, StateWithHistory } from 'redux-undo';
+import { EdgeRestriction } from './Map';
 
 export const usePolygonEditor = (
     onChange: (polygon: Coordinate[] | Coordinate[][], isValid: boolean) => void = () => {},
@@ -16,6 +17,9 @@ export const usePolygonEditor = (
     const polygonList = ensurePolygonList(polygons);
 
     const [selection, setSelection] = useState<Set<number>>(new Set());
+
+    const [edgeRestriction, setEdgeRestriction] = useState<EdgeRestriction | null>(null);
+
     const [editHistory, setEditHistory] = useState<Omit<StateWithHistory<PolygonEditState>, 'present'>>({
         past: [],
         future: [],
@@ -26,6 +30,7 @@ export const usePolygonEditor = (
             polygons: polygonList,
             activeIndex: activeIndex,
             selection: selection,
+            edgeRestriction: edgeRestriction,
         },
         ...editHistory,
     };
@@ -100,6 +105,7 @@ export const usePolygonEditor = (
         selection: state.present.selection,
         polygons: state.present.polygons,
         isPolygonClosed: polygonIsClosed,
+        edgeRestriction,
         addPoint,
         addPointToEdge,
         deselectAllPoints,
@@ -110,6 +116,7 @@ export const usePolygonEditor = (
         deletePolygonPoints,
         selectAllPoints,
         setPolygon,
+        setEdgeRestriction,
         undo,
         redo,
     };

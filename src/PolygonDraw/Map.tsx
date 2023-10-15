@@ -14,6 +14,7 @@ import {
     getPolygonEdges,
     isCoordinateInPolygon,
     isPolygonClosed,
+    getMidPoint,
 } from '../helpers';
 import { Modal } from '../common/components/Modal';
 import { ExportPolygonForm } from '../conversion/ExportPolygonForm';
@@ -27,6 +28,9 @@ import { PolygonVertex } from './PolygonVertex';
 import { BoundaryPolygon } from './BoundaryPolygon';
 import { Polygon } from './Polygon';
 import MapInner from './MapInner';
+import { EdgeConstraintsBar } from '../ActionBar/EdgeConstraintsBar';
+import { IconForHorizontal } from '../ActionBar/Icons/IconForHorizontal';
+import { IconForVertical } from '../ActionBar/Icons/IconForVertical';
 
 interface MapSnapshot {
     reframe: boolean;
@@ -51,6 +55,7 @@ export interface Props {
     onMouseEnter?: (index: number) => void;
     onMouseLeave?: (index: number) => void;
     addPoint: (coord: Coordinate) => void;
+    setEdgeRestriction: (restriction: EdgeRestriction) => void;
     addPointToEdge: (coordinate: Coordinate, index: number) => void;
     deselectAllPoints: () => void;
     removePointFromSelection: (index: number) => void;
@@ -75,13 +80,19 @@ export interface State {
         endPosition: Coordinate;
         startTime: number;
     } | null;
+    selectedEdge:number | null;
+    edgeRelationships: string[], 
     previousMouseMovePosition?: Coordinate;
+    edgeRestrictions: EdgeRestriction;
     isPenToolActive: boolean;
     isDrawToolActive: boolean;
     newPointPosition: Coordinate | null;
     showExportPolygonModal: boolean;
     showImportPolygonModal: boolean;
 }
+
+export type EdgeRestriction = 'horizontal' | 'vertical' | 'none' | null;
+
 
 export class BaseMap extends React.Component<Props, State> {
     private map: MapType | null = null;
@@ -92,6 +103,9 @@ export class BaseMap extends React.Component<Props, State> {
         isMoveActive: false,
         rectangleSelection: null,
         previousMouseMovePosition: undefined,
+        selectedEdge: null,
+        edgeRestrictions: null,
+        edgeRelationships: [], 
         isPenToolActive: false,
         isDrawToolActive: false,
         newPointPosition: null,
@@ -394,6 +408,8 @@ export class BaseMap extends React.Component<Props, State> {
                 this.setState({ isMovedPointInBoundary: false });
             }
         }
+
+        
     };
 
     endVertexMove = () => {
@@ -406,6 +422,105 @@ export class BaseMap extends React.Component<Props, State> {
         }
     };
 
+    handleEdgeClick = (coordinate: Coordinate, index: number) => {
+        if (this.state.selectedEdge === index) {
+            // If the same edge is clicked, add a vertex in the middle of the edge.
+            this.handleAddVertexInMiddleOfEdge();
+        } else {
+            // Otherwise, just set the clicked edge as the selected edge.
+            this.setState({ selectedEdge: index });
+        }
+    };
+
+    
+    
+
+    handleAddVertexInMiddleOfEdge = () => {
+        if (this.state.selectedEdge === null) {
+            console.error("No edge selected to add a vertex.");
+            return;
+        }
+    
+        const activePolygon = this.props.polygonCoordinates[this.props.activePolygonIndex];
+        const startPoint = activePolygon[this.state.selectedEdge];
+        const endPoint = activePolygon[(this.state.selectedEdge + 1) % activePolygon.length];
+        // const midpoint = getMidPoint(startPoint, endPoint);
+    
+        // this.props.addPointToEdge(midpoint, this.state.selectedEdge);
+        // this.setState({
+        //     selectedEdge: null
+        // });
+
+        let midpoint;
+
+        // if (this.state.edgeRestrictions === 'horizontal') {
+        //     midpoint = {
+        //         latitude: (startPoint.latitude + endPoint.latitude) / 2,
+        //         longitude: startPoint.longitude  // Keeps the longitude unchanged to ensure a horizontal edge.
+        //     };
+        // } else if (this.state.edgeRestrictions === 'vertical') {
+        //     midpoint = {
+        //         latitude: startPoint.latitude,  // Keeps the latitude unchanged to ensure a vertical edge.
+        //         longitude: (startPoint.longitude + endPoint.longitude) / 2
+        //     };
+        // } else {
+        //     midpoint = getMidPoint(startPoint, endPoint);  // Assuming getMidPoint() returns a Coordinate object with latitude and longitude.
+        // }
+
+
+        if (this.state.edgeRelationships[this.state.selectedEdge] === 'horizontal') {
+            midpoint = {
+                latitude: (startPoint.latitude + endPoint.latitude) / 2,
+                longitude: startPoint.longitude, // Keeps the longitude unchanged to ensure a horizontal edge.
+            };
+        } else if (this.state.edgeRelationships[this.state.selectedEdge] === 'vertical') {
+            midpoint = {
+                latitude: startPoint.latitude, // Keeps the latitude unchanged to ensure a vertical edge.
+                longitude: (startPoint.longitude + endPoint.longitude) / 2,
+            };
+        } else {
+            midpoint = getMidPoint(startPoint, endPoint); // Calculate the midpoint using your existing logic.
+        }
+    
+        this.props.addPointToEdge(midpoint, this.state.selectedEdge);
+
+        this.setState({
+            selectedEdge: null
+        });
+    };
+
+    setEdgeRelationship = (relationshipType: string) => {
+        if (this.state.selectedEdge !== null) {
+            const updatedEdgeRelationships = [...this.state.edgeRelationships];
+            updatedEdgeRelationships[this.state.selectedEdge] = relationshipType;
+            this.setState({ edgeRelationships: updatedEdgeRelationships });
+        }
+    };
+
+    handleSetHorizontal = () => {
+        this.setState({ edgeRestrictions: 'horizontal' }, () => {
+            // Call the function to set the edge restriction in the parent component
+            this.props.setEdgeRestriction('horizontal');
+            this.setEdgeRelationship('horizontal');
+            
+        });
+        this.setState({ edgeRelationships: ['horizontal'] });
+        // Call the function to set the edge restriction in the parent component
+        this.props.setEdgeRestriction('horizontal');
+    }
+    
+    handleSetVertical = () => {
+        this.setState({ edgeRestrictions: 'vertical' }, () => {
+            // Call the function to set the edge restriction in the parent component
+            this.props.setEdgeRestriction('vertical');
+            this.setEdgeRelationship('vertical');
+        });
+        this.setState({ edgeRelationships: ['vertical'] });
+    // Call the function to set the edge restriction in the parent component
+        this.props.setEdgeRestriction('vertical');
+    }
+
+    
     ///////////////////////////////////////////////////////////////////////////
     //                      Keyboard handling methods                        //
     ///////////////////////////////////////////////////////////////////////////
@@ -480,12 +595,43 @@ export class BaseMap extends React.Component<Props, State> {
     };
 
     renderVertexEdge = (coordinate: Coordinate, index: number) => (
-        <EdgeVertex key={index} index={index} coordinate={coordinate} onClick={this.props.addPointToEdge} />
+        <EdgeVertex 
+            key={index} 
+                index={index} 
+                coordinate={coordinate} 
+                onClick={this.props.addPointToEdge} 
+                edgeRestriction={this.state.edgeRestrictions}
+            />
     );
+    // the olde version with not fincvtionalitu to work with the adding the vertexe to the middle of the
+    // renderPolygonEdges = () => {
+    //     return getPolygonEdges(this.props.polygonCoordinates[this.props.activePolygonIndex]).map(this.renderVertexEdge);
+    // };
 
+    // the new wersion of the renderVertexEdge
     renderPolygonEdges = () => {
-        return getPolygonEdges(this.props.polygonCoordinates[this.props.activePolygonIndex]).map(this.renderVertexEdge);
+        return getPolygonEdges(this.props.polygonCoordinates[this.props.activePolygonIndex]).map((coordinate, index) => (
+            <EdgeVertex
+                key={index}
+                index={index}
+                coordinate={coordinate}
+                onClick={this.handleEdgeClick}
+                edgeRestriction={this.state.edgeRestrictions} 
+            >
+                {this.state.selectedEdge === index && (
+                    <div>
+                        Relationship: {this.state.edgeRelationships[index]}
+                        {/* Render icons here based on the relationship type */}
+                        {this.state.edgeRelationships[index] === 'horizontal' && <IconForHorizontal />}
+                        {this.state.edgeRelationships[index] === 'vertical' && <IconForVertical />}
+                    </div>
+                )}
+            </EdgeVertex>
+        ));
     };
+    
+    
+
 
     renderInactivePolygons = () => {
         const activePolygonIsClosed = isPolygonClosed(this.props.polygonCoordinates[this.props.activePolygonIndex]);
@@ -615,11 +761,16 @@ export class BaseMap extends React.Component<Props, State> {
                     isDrawModeEnabled={isDrawToolActive}
                     onDelete={this.props.deletePolygonPoints}
                     onFocus={this.handleOnFocusClicked}
+                    onAddVertex={this.handleAddVertexInMiddleOfEdge}
                     onEnableDrawMode={this.toggleDrawMode}
                     onEnableVectorMode={this.toggleVectorMode}
                     deleteInactive={selection.size === 0}
                     onExport={this.handleExportPolygonActionClicked}
                     onImport={this.handleImportPolygonActionClicked}
+                />
+                 <EdgeConstraintsBar 
+                    onSetHorizontal={this.handleSetHorizontal} 
+                    onSetVertical={this.handleSetVertical} 
                 />
 
                 {this.state.showExportPolygonModal && (

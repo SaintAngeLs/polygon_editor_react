@@ -139,3 +139,15 @@ export const ensurePolygonList = (polygons: Coordinate[] | Coordinate[][]): Coor
 export const isPolygonList = (polygons: Coordinate[] | Coordinate[][]): polygons is Coordinate[][] => {
     return Array.isArray(polygons[0]);
 };
+
+
+/**
+     * function to calculate the midpoint of the edge
+     * @param coord1
+     * @param coord2
+*/
+export const getMidPoint = (coord1: Coordinate, coord2: Coordinate) => ({
+    latitude: (coord1.latitude + coord2.latitude) / 2,
+    longitude: (coord1.longitude + coord2.longitude) / 2
+
+});

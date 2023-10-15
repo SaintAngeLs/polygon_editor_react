@@ -6,3 +6,10 @@
 - updaing the Map.test.tsx:
     - maing the drawable: false
     - in casle of the test when the component will be prepared set the drawable to drawable: false  ???
+
+- adding the functionality of adding the vertex in the middle of the specific edge: click of the pen, click in the midpoint of the edge and click the "+ Vertex" button of the ActionButtons => adding the vertex to the middle of the edge.
+
+- Added the none component selection varian to the AddConstraints component
+
+- added the functionality to add the restrictions to the specific edge: aclick of the edge, press the add vertex and the edge will be changed accordingly is the restrcition was activated
+

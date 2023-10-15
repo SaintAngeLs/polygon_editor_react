@@ -4,12 +4,12 @@ import { Meta } from '@storybook/react';
 
 import { PolygonDraw } from '../src/PolygonDraw/PolygonDraw';
 import { Coordinate } from '../src/types';
-import { BOUNDARY, POLYGON, POLYGON_ONE, POLYGON_TWO, POLYGON_THREE } from './polygons';
+import { BOUNDARY, POLYGON, POLYGON_ONE, POLYGON_TWO, POLYGON_THREE, POLYGON_FOUR } from './polygons';
 import { StateContainer } from './StateContainer';
 
 import 'leaflet/dist/leaflet.css';
 
-const SAMPLES: Coordinate[][] = [POLYGON_ONE, POLYGON_TWO, POLYGON_THREE];
+const SAMPLES: Coordinate[][] = [POLYGON_ONE, POLYGON_TWO, POLYGON_THREE, POLYGON_FOUR];
 
 const polygonChangeAction = action('polygon changed');
 const polygonClickedAction = action('polygon clicked');
@@ -29,6 +29,7 @@ export const Default = () => (
             <>
                 <PolygonDraw
                     polygon={state.polygon}
+                    editable={true} 
                     onChange={(polygon, isValid) => {
                         setState({ polygon: polygon });
                         polygonChangeAction(polygon, isValid);

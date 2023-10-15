@@ -13,21 +13,26 @@ import {
     ADD_POINT_TO_EDGE,
     CHANGE_POLYGON,
     SET_POLYGON,
+    SET_EDGE_RESTRICTION,
 } from './actions';
 import { Coordinate } from 'types';
 
 import { movePolygonCoordinates, removeSelectedPoints } from '../helpers';
+import { EdgeRestriction } from './Map';
 
 export interface PolygonEditState {
     activeIndex: number;
     polygons: Coordinate[][];
     selection: Set<number>;
+    edgeRestriction: EdgeRestriction,
 }
+
+
 
 export const polygonEditReducer = (state: PolygonEditState, action: Actions): PolygonEditState => {
     switch (action.type) {
         ///////////////////////////////////////////////////////////////////////////////////
-        ///                            CHANGE POLYGON CASES                             ///
+        ///                            CHANGE POLYGON CASES and ADDING RESTRICTIONS                             ///
         ///////////////////////////////////////////////////////////////////////////////////
         case CHANGE_POLYGON: {
             return {
@@ -44,6 +49,12 @@ export const polygonEditReducer = (state: PolygonEditState, action: Actions): Po
                     ...state.polygons.slice(state.activeIndex + 1),
                 ],
                 selection: new Set(),
+            };
+        }
+        case SET_EDGE_RESTRICTION: {
+            return {
+                ...state,
+                edgeRestriction: action.payload, 
             };
         }
 
