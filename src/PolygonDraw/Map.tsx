@@ -117,6 +117,7 @@ export class BaseMap extends React.Component<Props, State> {
         return {
             ...state,
             isPenToolActive: props.polygonCoordinates.length === 0 ? true : state.isPenToolActive,
+            isDrawToolActive: props.polygonCoordinates.length === 0 ? false : state.isDrawToolActive,
         };
     }
 
@@ -206,6 +207,7 @@ export class BaseMap extends React.Component<Props, State> {
         }
         this.setState({
             isPenToolActive: !this.state.isPenToolActive,
+            isDrawToolActive: false, // Ensure the "draw" tool is deactivated when switching to the "pen" tool
             newPointPosition: null,
         });
     };
@@ -215,7 +217,8 @@ export class BaseMap extends React.Component<Props, State> {
             return;
         }
         this.setState({
-            isPenToolActive: !this.state.isPenToolActive,
+            isDrawToolActive: !this.state.isDrawToolActive,
+            isPenToolActive: false, // Ensure the "pen" tool is deactivated when switching to the "draw" tool
             newPointPosition: null,
         });
     };
