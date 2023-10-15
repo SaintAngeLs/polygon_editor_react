@@ -29,6 +29,8 @@ import { BoundaryPolygon } from './BoundaryPolygon';
 import { Polygon } from './Polygon';
 import MapInner from './MapInner';
 import { EdgeConstraintsBar } from '../ActionBar/EdgeConstraintsBar';
+import { IconForHorizontal } from '../ActionBar/Icons/IconForHorizontal';
+import { IconForVertical } from '../ActionBar/Icons/IconForVertical';
 
 interface MapSnapshot {
     reframe: boolean;
@@ -79,6 +81,7 @@ export interface State {
         startTime: number;
     } | null;
     selectedEdge:number | null;
+    edgeRelationships: string[], 
     previousMouseMovePosition?: Coordinate;
     edgeRestrictions: EdgeRestriction;
     isPenToolActive: boolean;
@@ -102,6 +105,7 @@ export class BaseMap extends React.Component<Props, State> {
         previousMouseMovePosition: undefined,
         selectedEdge: null,
         edgeRestrictions: null,
+        edgeRelationships: [], 
         isPenToolActive: false,
         isDrawToolActive: false,
         newPointPosition: null,
@@ -449,18 +453,33 @@ export class BaseMap extends React.Component<Props, State> {
 
         let midpoint;
 
-        if (this.state.edgeRestrictions === 'horizontal') {
+        // if (this.state.edgeRestrictions === 'horizontal') {
+        //     midpoint = {
+        //         latitude: (startPoint.latitude + endPoint.latitude) / 2,
+        //         longitude: startPoint.longitude  // Keeps the longitude unchanged to ensure a horizontal edge.
+        //     };
+        // } else if (this.state.edgeRestrictions === 'vertical') {
+        //     midpoint = {
+        //         latitude: startPoint.latitude,  // Keeps the latitude unchanged to ensure a vertical edge.
+        //         longitude: (startPoint.longitude + endPoint.longitude) / 2
+        //     };
+        // } else {
+        //     midpoint = getMidPoint(startPoint, endPoint);  // Assuming getMidPoint() returns a Coordinate object with latitude and longitude.
+        // }
+
+
+        if (this.state.edgeRelationships[this.state.selectedEdge] === 'horizontal') {
             midpoint = {
                 latitude: (startPoint.latitude + endPoint.latitude) / 2,
-                longitude: startPoint.longitude  // Keeps the longitude unchanged to ensure a horizontal edge.
+                longitude: startPoint.longitude, // Keeps the longitude unchanged to ensure a horizontal edge.
             };
-        } else if (this.state.edgeRestrictions === 'vertical') {
+        } else if (this.state.edgeRelationships[this.state.selectedEdge] === 'vertical') {
             midpoint = {
-                latitude: startPoint.latitude,  // Keeps the latitude unchanged to ensure a vertical edge.
-                longitude: (startPoint.longitude + endPoint.longitude) / 2
+                latitude: startPoint.latitude, // Keeps the latitude unchanged to ensure a vertical edge.
+                longitude: (startPoint.longitude + endPoint.longitude) / 2,
             };
         } else {
-            midpoint = getMidPoint(startPoint, endPoint);  // Assuming getMidPoint() returns a Coordinate object with latitude and longitude.
+            midpoint = getMidPoint(startPoint, endPoint); // Calculate the midpoint using your existing logic.
         }
     
         this.props.addPointToEdge(midpoint, this.state.selectedEdge);
@@ -470,18 +489,35 @@ export class BaseMap extends React.Component<Props, State> {
         });
     };
 
+    setEdgeRelationship = (relationshipType: string) => {
+        if (this.state.selectedEdge !== null) {
+            const updatedEdgeRelationships = [...this.state.edgeRelationships];
+            updatedEdgeRelationships[this.state.selectedEdge] = relationshipType;
+            this.setState({ edgeRelationships: updatedEdgeRelationships });
+        }
+    };
+
     handleSetHorizontal = () => {
         this.setState({ edgeRestrictions: 'horizontal' }, () => {
             // Call the function to set the edge restriction in the parent component
             this.props.setEdgeRestriction('horizontal');
+            this.setEdgeRelationship('horizontal');
+            
         });
+        this.setState({ edgeRelationships: ['horizontal'] });
+        // Call the function to set the edge restriction in the parent component
+        this.props.setEdgeRestriction('horizontal');
     }
     
     handleSetVertical = () => {
         this.setState({ edgeRestrictions: 'vertical' }, () => {
             // Call the function to set the edge restriction in the parent component
             this.props.setEdgeRestriction('vertical');
+            this.setEdgeRelationship('vertical');
         });
+        this.setState({ edgeRelationships: ['vertical'] });
+    // Call the function to set the edge restriction in the parent component
+        this.props.setEdgeRestriction('vertical');
     }
 
     
@@ -581,7 +617,16 @@ export class BaseMap extends React.Component<Props, State> {
                 coordinate={coordinate}
                 onClick={this.handleEdgeClick}
                 edgeRestriction={this.state.edgeRestrictions} 
-            />
+            >
+                {this.state.selectedEdge === index && (
+                    <div>
+                        Relationship: {this.state.edgeRelationships[index]}
+                        {/* Render icons here based on the relationship type */}
+                        {this.state.edgeRelationships[index] === 'horizontal' && <IconForHorizontal />}
+                        {this.state.edgeRelationships[index] === 'vertical' && <IconForVertical />}
+                    </div>
+                )}
+            </EdgeVertex>
         ));
     };
     

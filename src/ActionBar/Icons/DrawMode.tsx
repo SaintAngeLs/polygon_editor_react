@@ -8,9 +8,6 @@ interface Props extends SVGProps<SVGSVGElement> {
 
 export const DrawMode: FunctionComponent<Props> = ({ iconColor = AUTHENTIC_BLUE_900, ...props }: Props) => (
     <svg width={24} height={24} viewBox="0 0 24 24" {...props}>
-        <path
-            fill={iconColor}
-            d="M15 13.2v7.4l-14.3 3 3-14.3H11l3.9 3.9zm-9.4-1.6l-2 9 9-1.9v-7.1h-7zm13.8 3a3.5 3.5 0 0 1-5 0l-4.8-5a3.5 3.5 0 0 1 0-4.8l4-4.1 9.8 9.8-4 4zm-11.5 0a1.2 1.2 0 1 1 1.7 1.6 1.2 1.2 0 0 1-1.7-1.6z"
-        />
+        <path fill={iconColor} stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
     </svg>
 );

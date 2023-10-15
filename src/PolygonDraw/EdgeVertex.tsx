@@ -11,6 +11,7 @@ interface Props {
     index: number;
     onClick: (coordinate: Coordinate, index: number) => void;
     edgeRestriction: EdgeRestriction;
+    children?: React.ReactNode;
 }
 
 interface State {

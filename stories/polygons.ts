@@ -68,6 +68,14 @@ export const POLYGON_THREE = [
     { longitude: 10.037727355957031, latitude: 53.58292651697834 },
 ];
 
+export const POLYGON_FOUR = [
+    { longitude: 11.037727355957031, latitude: 53.58292651697834 },
+    { longitude: 10.976272583007812, latitude: 53.576811578422124 },
+    { longitude: 11.084762573242188, latitude: 53.53806309007896 },
+    { longitude: 11.037727355957031, latitude: 53.58292651697834 },
+];
+
+
 export const BOUNDARY: Coordinate[] = [
     {
         latitude: 53.443987343914415,
