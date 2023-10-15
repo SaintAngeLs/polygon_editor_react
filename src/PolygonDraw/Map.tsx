@@ -275,6 +275,7 @@ export class BaseMap extends React.Component<Props, State> {
         if (this.state.isDrawToolActive) {
             const newPolygon = [...this.props.polygonCoordinates[this.props.activePolygonIndex], coordinate];
             this.props.setPolygon(newPolygon);
+            
         } else if (
             this.state.isPenToolActive &&
             !this.props.isPolygonClosed &&
