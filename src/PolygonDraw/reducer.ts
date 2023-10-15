@@ -40,6 +40,7 @@ export const polygonEditReducer = (state: PolygonEditState, action: Actions): Po
                 polygons: [...action.payload],
             };
         }
+
         case SET_POLYGON: {
             return {
                 ...state,
@@ -51,6 +52,7 @@ export const polygonEditReducer = (state: PolygonEditState, action: Actions): Po
                 selection: new Set(),
             };
         }
+        
         case SET_EDGE_RESTRICTION: {
             return {
                 ...state,

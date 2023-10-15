@@ -272,7 +272,10 @@ export class BaseMap extends React.Component<Props, State> {
 
     handleMapClick = (event: LeafletMouseEvent) => {
         const coordinate = createCoordinateFromLeafletLatLng(event.latlng);
-        if (
+        if (this.state.isDrawToolActive) {
+            const newPolygon = [...this.props.polygonCoordinates[this.props.activePolygonIndex], coordinate];
+            this.props.setPolygon(newPolygon);
+        } else if (
             this.state.isPenToolActive &&
             !this.props.isPolygonClosed &&
             isCoordinateInPolygon(coordinate, this.props.boundaryPolygonCoordinates)
