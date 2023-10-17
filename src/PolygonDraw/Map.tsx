@@ -86,6 +86,7 @@ export interface State {
     edgeRestrictions: EdgeRestriction;
     isPenToolActive: boolean;
     isDrawToolActive: boolean;
+    selectedEdgeRestriction: string | null;
     newPointPosition: Coordinate | null;
     showExportPolygonModal: boolean;
     showImportPolygonModal: boolean;
@@ -108,6 +109,7 @@ export class BaseMap extends React.Component<Props, State> {
         edgeRelationships: [], 
         isPenToolActive: false,
         isDrawToolActive: false,
+        selectedEdgeRestriction: null,
         newPointPosition: null,
         showExportPolygonModal: false,
         showImportPolygonModal: false,
@@ -430,6 +432,13 @@ export class BaseMap extends React.Component<Props, State> {
     };
 
     handleEdgeClick = (coordinate: Coordinate, index: number) => {
+
+        const { edgeRelationships } = this.state;
+       
+            const restriction = edgeRelationships[index];
+            console.log(`Edge ${index} has restriction: ${restriction}`);
+        
+
         if (this.state.selectedEdge === index) {
             // If the same edge is clicked, add a vertex in the middle of the edge.
             this.handleAddVertexInMiddleOfEdge();
@@ -511,9 +520,15 @@ export class BaseMap extends React.Component<Props, State> {
             this.setEdgeRelationship('horizontal');
             
         });
-        this.setState({ edgeRelationships: ['horizontal'] });
-        // Call the function to set the edge restriction in the parent component
-        this.props.setEdgeRestriction('horizontal');
+        // this.setState({ edgeRelationships: ['horizontal'] });
+        // // Call the function to set the edge restriction in the parent component
+        // this.props.setEdgeRestriction('horizontal');
+
+        if (this.state.selectedEdge !== null) {
+            const updatedEdgeRelationships = [...this.state.edgeRelationships];
+            updatedEdgeRelationships[this.state.selectedEdge] = 'horizontal';
+            this.setState({ edgeRelationships: updatedEdgeRelationships, selectedEdgeRestriction: 'horizontal' });
+        }
     }
     
     handleSetVertical = () => {
@@ -522,9 +537,15 @@ export class BaseMap extends React.Component<Props, State> {
             this.props.setEdgeRestriction('vertical');
             this.setEdgeRelationship('vertical');
         });
-        this.setState({ edgeRelationships: ['vertical'] });
-    // Call the function to set the edge restriction in the parent component
-        this.props.setEdgeRestriction('vertical');
+    //     this.setState({ edgeRelationships: ['vertical'] });
+    // // Call the function to set the edge restriction in the parent component
+    //     this.props.setEdgeRestriction('vertical');
+
+        if (this.state.selectedEdge !== null) {
+            const updatedEdgeRelationships = [...this.state.edgeRelationships];
+            updatedEdgeRelationships[this.state.selectedEdge] = 'vertical';
+            this.setState({ edgeRelationships: updatedEdgeRelationships, selectedEdgeRestriction: 'vertical' });
+        }
     }
 
     
@@ -629,6 +650,7 @@ export class BaseMap extends React.Component<Props, State> {
                 {this.state.selectedEdge === index && (
                     <div className='z-10000'>
                         Relationship: {this.state.edgeRelationships[index]}
+                        <div className='z-10000'>Restriction: {this.state.selectedEdgeRestriction}</div>
                         {/* Render icons here based on the relationship type */}
                         {this.state.edgeRelationships[index] === 'horizontal' && <IconForHorizontal />}
                         {this.state.edgeRelationships[index] === 'vertical' && <IconForVertical />}
