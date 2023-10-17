@@ -435,10 +435,9 @@ export class BaseMap extends React.Component<Props, State> {
 
         const { edgeRelationships } = this.state;
        
-            const restriction = edgeRelationships[index];
-            console.log(`Edge ${index} has restriction: ${restriction}`);
-        
-
+        const restriction = edgeRelationships[index];
+        console.log(`Edge ${index} has restriction: ${restriction}`);
+    
         if (this.state.selectedEdge === index) {
             // If the same edge is clicked, add a vertex in the middle of the edge.
             this.handleAddVertexInMiddleOfEdge();
