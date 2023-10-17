@@ -444,6 +444,7 @@ export class BaseMap extends React.Component<Props, State> {
         } else {
             // Otherwise, just set the clicked edge as the selected edge.
             this.setState({ selectedEdge: index });
+            
         }
     };
 
@@ -651,8 +652,18 @@ export class BaseMap extends React.Component<Props, State> {
                         Relationship: {this.state.edgeRelationships[index]}
                         <div className='z-10000'>Restriction: {this.state.selectedEdgeRestriction}</div>
                         {/* Render icons here based on the relationship type */}
-                        {this.state.edgeRelationships[index] === 'horizontal' && <IconForHorizontal />}
-                        {this.state.edgeRelationships[index] === 'vertical' && <IconForVertical />}
+                        {this.state.edgeRelationships[index] === 'horizontal' && (
+                        <>
+                            <IconForHorizontal />
+                            {console.log("The horizontal icon is shown")}
+                        </>
+                        )}
+                        {this.state.edgeRelationships[index] === 'vertical' && (
+                            <>
+                                <IconForVertical />
+                                {console.log("The vertical icon is shown")}
+                            </>
+                        )}
                     </div>
                 )}
             </EdgeVertex>
