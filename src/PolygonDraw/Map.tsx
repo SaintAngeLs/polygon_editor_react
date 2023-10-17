@@ -622,11 +622,12 @@ export class BaseMap extends React.Component<Props, State> {
                 key={index}
                 index={index}
                 coordinate={coordinate}
-                onClick={this.handleEdgeClick}
+                //onClick={this.handleEdgeClick}
+                onClick={() => this.handleEdgeClick(coordinate, index)}
                 edgeRestriction={this.state.edgeRestrictions} 
             >
                 {this.state.selectedEdge === index && (
-                    <div>
+                    <div className='z-10000'>
                         Relationship: {this.state.edgeRelationships[index]}
                         {/* Render icons here based on the relationship type */}
                         {this.state.edgeRelationships[index] === 'horizontal' && <IconForHorizontal />}
