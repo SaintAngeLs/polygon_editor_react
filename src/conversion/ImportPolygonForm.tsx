@@ -21,7 +21,7 @@ const StyledTextarea = styled(Textarea)`
 `;
 
 interface Props {
-    onSubmit?: (coordinates: Coordinate[][]) => void;
+    onSubmit?: (coordinates: Coordinate[]) => void;
 }
 
 export const ImportPolygonForm: React.FC<Props> = ({ onSubmit = () => {} }) => {
@@ -48,7 +48,7 @@ export const ImportPolygonForm: React.FC<Props> = ({ onSubmit = () => {} }) => {
         e.preventDefault();
 
         if (deserialized.valid) {
-            onSubmit([deserialized.coordinates]);
+            onSubmit(deserialized.coordinates);
             dismiss();
         }
     };

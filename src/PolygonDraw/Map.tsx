@@ -64,7 +64,7 @@ export interface Props {
     moveSelectedPoints: (newPosition: Coordinate) => void;
     deletePolygonPoints: () => void;
     selectAllPoints: () => void;
-    setPolygon: (polygon: Coordinate[][]) => void;
+    setPolygon: (polygon: Coordinate[]) => void;
     onUndo: () => void;
     onRedo: () => void;
 }
@@ -258,7 +258,7 @@ export class BaseMap extends React.Component<Props, State> {
         this.setState({ showExportPolygonModal: false });
     };
 
-    handleImportPolygon = (coordinates: Coordinate[][]) => {
+    handleImportPolygon = (coordinates: Coordinate[]) => {
         this.props.setPolygon(coordinates);
         this.reframeOnPolygon(coordinates);
     };
@@ -304,7 +304,7 @@ export class BaseMap extends React.Component<Props, State> {
         const { tempPolygon } = this.state;
         if (tempPolygon && tempPolygon.length > 2) {
             // Add the completed polygon to your state or dispatch an action
-            this.props.setPolygon([...this.props.polygonCoordinates, tempPolygon]);
+            this.props.setPolygon(tempPolygon);
             // Clear the temporary polygon
             this.setState({ tempPolygon:  [] });
         }
