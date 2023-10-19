@@ -64,7 +64,7 @@ export interface Props {
     moveSelectedPoints: (newPosition: Coordinate) => void;
     deletePolygonPoints: () => void;
     selectAllPoints: () => void;
-    setPolygon: (polygon: Coordinate[]) => void;
+    setPolygon: (polygon: Coordinate[][]) => void;
     onUndo: () => void;
     onRedo: () => void;
 }
@@ -81,7 +81,8 @@ export interface State {
         startTime: number;
     } | null;
     selectedEdge:number | null;
-    edgeRelationships: string[], 
+    edgeRelationships: string[];
+    tempPolygon: Coordinate[];
     previousMouseMovePosition?: Coordinate;
     edgeRestrictions: EdgeRestriction;
     isPenToolActive: boolean;
@@ -105,8 +106,9 @@ export class BaseMap extends React.Component<Props, State> {
         rectangleSelection: null,
         previousMouseMovePosition: undefined,
         selectedEdge: null,
-        edgeRestrictions: null,
+        edgeRestrictions: 'none',
         edgeRelationships: [], 
+        tempPolygon: [],
         isPenToolActive: false,
         isDrawToolActive: false,
         selectedEdgeRestriction: null,
@@ -222,6 +224,7 @@ export class BaseMap extends React.Component<Props, State> {
             isDrawToolActive: !this.state.isDrawToolActive,
             isPenToolActive: false, // Ensure the "pen" tool is deactivated when switching to the "draw" tool
             newPointPosition: null,
+            tempPolygon: [],
         });
     };
 
@@ -255,7 +258,7 @@ export class BaseMap extends React.Component<Props, State> {
         this.setState({ showExportPolygonModal: false });
     };
 
-    handleImportPolygon = (coordinates: Coordinate[]) => {
+    handleImportPolygon = (coordinates: Coordinate[][]) => {
         this.props.setPolygon(coordinates);
         this.reframeOnPolygon(coordinates);
     };
@@ -274,11 +277,19 @@ export class BaseMap extends React.Component<Props, State> {
 
     handleMapClick = (event: LeafletMouseEvent) => {
         const coordinate = createCoordinateFromLeafletLatLng(event.latlng);
+
         if (this.state.isDrawToolActive) {
-            const newPolygon = [...this.props.polygonCoordinates[this.props.activePolygonIndex], coordinate];
-            this.props.setPolygon(newPolygon);
-            
-        } else if (
+            if (!this.state.tempPolygon) {
+                // Start a new polygon if one doesn't exist
+                this.setState({ tempPolygon: [coordinate] });
+            } else {
+                // Add a new point to the existing temporary polygon
+                this.setState((prevState) => ({
+                    tempPolygon: [...prevState.tempPolygon, coordinate],
+                }));
+            }
+        } 
+        else if (
             this.state.isPenToolActive &&
             !this.props.isPolygonClosed &&
             isCoordinateInPolygon(coordinate, this.props.boundaryPolygonCoordinates)
@@ -286,6 +297,16 @@ export class BaseMap extends React.Component<Props, State> {
             this.props.addPoint(coordinate);
         } else if (!this.state.isShiftPressed) {
             this.props.deselectAllPoints();
+        }
+    };
+
+    handleCompleteDrawing = () => {
+        const { tempPolygon } = this.state;
+        if (tempPolygon && tempPolygon.length > 2) {
+            // Add the completed polygon to your state or dispatch an action
+            this.props.setPolygon([...this.props.polygonCoordinates, tempPolygon]);
+            // Clear the temporary polygon
+            this.setState({ tempPolygon:  [] });
         }
     };
 
@@ -513,40 +534,57 @@ export class BaseMap extends React.Component<Props, State> {
         }
     };
 
-    handleSetHorizontal = () => {
-        this.setState({ edgeRestrictions: 'horizontal' }, () => {
-            // Call the function to set the edge restriction in the parent component
-            this.props.setEdgeRestriction('horizontal');
-            this.setEdgeRelationship('horizontal');
+    // handleSetHorizontal = () => {
+    //     this.setState({ edgeRestrictions: 'horizontal' }, () => {
+    //         // Call the function to set the edge restriction in the parent component
+    //         this.props.setEdgeRestriction('horizontal');
+    //         this.setEdgeRelationship('horizontal');
             
-        });
-        // this.setState({ edgeRelationships: ['horizontal'] });
-        // // Call the function to set the edge restriction in the parent component
-        // this.props.setEdgeRestriction('horizontal');
+    //     });
+        
+    //     if (this.state.selectedEdge !== null) {
+    //         const updatedEdgeRelationships = [...this.state.edgeRelationships];
+    //         updatedEdgeRelationships[this.state.selectedEdge] = 'horizontal';
+    //         this.setState({ edgeRelationships: updatedEdgeRelationships, selectedEdgeRestriction: 'horizontal' });
+    //     }
+    // }
+    
+    // handleSetVertical = () => {
+    //     this.setState({ edgeRestrictions: 'vertical' }, () => {
+    //         // Call the function to set the edge restriction in the parent component
+    //         this.props.setEdgeRestriction('vertical');
+    //         this.sechromeEdgeRelationship('vertical');
+    //     });
+  
+    //     if (this.state.selectedEdge !== null) {
+    //         const updatedEdgeRelationships = [...this.state.edgeRelationships];
+    //         updatedEdgeRelationships[this.state.selectedEdge] = 'vertical';
+    //         this.setState({ edgeRelationships: updatedEdgeRelationships, selectedEdgeRestriction: 'vertical' });
+    //     }
+    // }
 
+    setRestriction = (direction: any) => {
+        this.setState({ edgeRestrictions: direction }, () => {
+            // Call the function to set the edge restriction in the parent component
+            this.props.setEdgeRestriction(direction);
+            this.setEdgeRelationship(direction);
+        });
+    
         if (this.state.selectedEdge !== null) {
             const updatedEdgeRelationships = [...this.state.edgeRelationships];
-            updatedEdgeRelationships[this.state.selectedEdge] = 'horizontal';
-            this.setState({ edgeRelationships: updatedEdgeRelationships, selectedEdgeRestriction: 'horizontal' });
+            updatedEdgeRelationships[this.state.selectedEdge] = direction;
+            this.setState({ edgeRelationships: updatedEdgeRelationships, selectedEdgeRestriction: direction });
         }
     }
     
-    handleSetVertical = () => {
-        this.setState({ edgeRestrictions: 'vertical' }, () => {
-            // Call the function to set the edge restriction in the parent component
-            this.props.setEdgeRestriction('vertical');
-            this.setEdgeRelationship('vertical');
-        });
-    //     this.setState({ edgeRelationships: ['vertical'] });
-    // // Call the function to set the edge restriction in the parent component
-    //     this.props.setEdgeRestriction('vertical');
-
-        if (this.state.selectedEdge !== null) {
-            const updatedEdgeRelationships = [...this.state.edgeRelationships];
-            updatedEdgeRelationships[this.state.selectedEdge] = 'vertical';
-            this.setState({ edgeRelationships: updatedEdgeRelationships, selectedEdgeRestriction: 'vertical' });
-        }
+    handleSetHorizontal = () => {
+        this.setRestriction('horizontal');
     }
+    
+    handleSetVertical = () => {
+        this.setRestriction('vertical');
+    }
+    
 
     
     ///////////////////////////////////////////////////////////////////////////
@@ -655,13 +693,13 @@ export class BaseMap extends React.Component<Props, State> {
                         {this.state.edgeRelationships[index] === 'horizontal' && (
                         <>
                             <IconForHorizontal />
-                            {console.log("The horizontal icon is shown")}
+                            {/* {console.log("The horizontal icon is shown")} */}
                         </>
                         )}
                         {this.state.edgeRelationships[index] === 'vertical' && (
                             <>
                                 <IconForVertical />
-                                {console.log("The vertical icon is shown")}
+                                {/* {console.log("The vertical icon is shown")} */}
                             </>
                         )}
                     </div>

@@ -101,7 +101,7 @@ export const ActionBar: FunctionComponent<Props> = ({
                 >
                     {LABELS.DRAW}
                 </ActionButton>
-                <ActionButton
+                {/* <ActionButton
                     onClick={onDelete}
                     icon={ActionButtonIcons.TRASHCAN}
                     activeIconColor={FREEDOM_RED_900}
@@ -110,7 +110,7 @@ export const ActionBar: FunctionComponent<Props> = ({
                     aria-label="Delete"
                 >
                     {LABELS.DELETE}
-                </ActionButton>
+                </ActionButton> */}
             </>
         )}
         <ActionButton onClick={onAddVertex} icon={ActionButtonIcons.ADD_VERTEX}>

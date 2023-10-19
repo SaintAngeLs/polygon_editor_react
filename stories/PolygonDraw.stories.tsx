@@ -88,12 +88,18 @@ export const MultiplePolygons = () => {
 // };
 
 export const New = () => (
-    <StateContainer initialState={{ polygon: [] as Coordinate[] }}>
+    <StateContainer initialState={{ polygons: [[]] as Coordinate[][] }}>
         {(state, setState) => (
             <PolygonDraw
-                polygon={state.polygon}
+                polygon={state.polygons[state.polygons.length - 1]}
                 onChange={(polygon, isValid) => {
-                    setState({ polygon });
+                    const updatedPolygons = [...state.polygons];
+                    if (isValid) {
+                        updatedPolygons.push(polygon); // Add a new polygon when the current one is complete.
+                    } else {
+                        updatedPolygons[updatedPolygons.length - 1] = polygon; // Update the current polygon.
+                    }
+                    setState({ polygons: updatedPolygons });
                     polygonChangeAction(polygon, isValid);
                 }}
             />

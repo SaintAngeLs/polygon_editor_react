@@ -103,6 +103,7 @@ export const ExportPolygonForm: React.FC<Props> = ({ polygon, onSubmit }) => {
     };
 
     const handleOnSubmit: FormEventHandler = (e) => {
+        
         e.preventDefault();
 
         if (!copyButtonClicked) {
@@ -115,6 +116,7 @@ export const ExportPolygonForm: React.FC<Props> = ({ polygon, onSubmit }) => {
 
     return (
         <Form onSubmit={handleOnSubmit}>
+
             <Headline>Export Polygon</Headline>
 
             <Select

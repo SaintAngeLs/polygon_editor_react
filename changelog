@@ -13,3 +13,28 @@
 
 - added the functionality to add the restrictions to the specific edge: aclick of the edge, press the add vertex and the edge will be changed accordingly is the restrcition was activated
 
+- adding the functionality to add the restriction for the edge: the none restriction for the edge is undefined, all of the edges has the undefined restrictions for all of the edges. Should update the to show the block with the restrictions above the adce with the respective icon componenets
+
+- Update the resucers: hangel the error
+[{
+	"resource": "/home/kaliuser/Documents/portfolio/commercial_apps/polygon_editor/react-polygon-editor/src/PolygonDraw/reducer.ts",
+	"owner": "typescript",
+	"code": "2322",
+	"severity": 8,
+	"message": "Type '(Coordinate[] | Coordinate[][])[]' is not assignable to type 'Coordinate[][]'.\n  Type 'Coordinate[] | Coordinate[][]' is not assignable to type 'Coordinate[]'.\n    Type 'Coordinate[][]' is not assignable to type 'Coordinate[]'.\n      Type 'Coordinate[]' is missing the following properties from type 'Coordinate': latitude, longitude",
+	"source": "ts",
+	"startLineNumber": 47,
+	"startColumn": 17,
+	"endLineNumber": 47,
+	"endColumn": 25,
+	"relatedInformation": [
+		{
+			"startLineNumber": 25,
+			"startColumn": 5,
+			"endLineNumber": 25,
+			"endColumn": 13,
+			"message": "The expected type comes from property 'polygons' which is declared here on type 'PolygonEditState'",
+			"resource": "/home/kaliuser/Documents/portfolio/commercial_apps/polygon_editor/react-polygon-editor/src/PolygonDraw/reducer.ts"
+		}
+	]
+}]
