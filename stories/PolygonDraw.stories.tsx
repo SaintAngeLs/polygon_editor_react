@@ -23,15 +23,32 @@ const meta: Meta = {
 
 export default meta;
 
+// The defaul polygon draw is the only one polygone with the possibility to edit only this one polygone, 
+// the MoultiplePolygones is the component wiht the list of the polygones and with the ability to edit all this polygone
+// The new component is the one component with the ability co crete only the one polygone and no more.
+
+// I want to update al of this components to make it possible to add the new polugone to each of the component 
+
 export const Default = () => (
-    <StateContainer initialState={{ polygon: POLYGON }}>
+    <StateContainer initialState={{ polygons: [POLYGON] }}>
         {(state, setState) => (
             <>
                 <PolygonDraw
-                    polygon={state.polygon}
+                    //polygon={state.polygon}
+                    polygon={state.polygons[state.polygons.length - 1]}
                     editable={true} 
+                    // onChange={(polygon, isValid) => {
+                    //     setState({ polygon: polygon });
+                    //     polygonChangeAction(polygon, isValid);
+                    // }}
                     onChange={(polygon, isValid) => {
-                        setState({ polygon: polygon });
+                        const updatedPolygons = [...state.polygons];
+                        if (isValid) {
+                            updatedPolygons.push(polygon);
+                        } else {
+                            updatedPolygons[updatedPolygons.length - 1] = polygon;
+                        }
+                        setState({ polygons: updatedPolygons });
                         polygonChangeAction(polygon, isValid);
                     }}
                 />

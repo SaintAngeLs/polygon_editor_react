@@ -22,6 +22,7 @@ export const ADD_POINT_TO_EDGE = 'POLYGON_DRAW/ADD_POINT_TO_EDGE';
 // Change polygon actions
 export const CHANGE_POLYGON = 'POLYGON_DRAW/CHANGE_POLYGON';
 export const SET_POLYGON = 'POLYGON_DRAW/SET_POLYGON';
+export const SET_POLYGONS = 'POLYGON_DRAW/SET_POLYGONS';
 export const SET_EDGE_RESTRICTION = 'POLYGON_DRAW/SET_EDGE_RESTRICTION';
 
 export const actions = {
@@ -31,7 +32,7 @@ export const actions = {
     removePointFromSelection: (index: number) => createAction(REMOVE_POINT_FROM_SELECTION, index),
     selectAllPoints: () => createAction(SELECT_ALL_POINTS),
     deselectAllPoints: () => createAction(DESELECT_ALL_POINTS),
-
+    setPolygons: (polygons: Coordinate[][][]) => createAction(SET_POLYGONS, polygons),
     // Add the actio creator for the addRestrictions
     setEdgeRestriction: (restriction: EdgeRestriction) =>
         createAction(SET_EDGE_RESTRICTION, restriction),

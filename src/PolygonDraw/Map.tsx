@@ -279,7 +279,8 @@ export class BaseMap extends React.Component<Props, State> {
         const coordinate = createCoordinateFromLeafletLatLng(event.latlng);
 
         if (this.state.isDrawToolActive) {
-            if (!this.state.tempPolygon) {
+            // Check if the draw tool is active
+            if (!this.state.tempPolygon || this.state.tempPolygon.length === 0) {
                 // Start a new polygon if one doesn't exist
                 this.setState({ tempPolygon: [coordinate] });
             } else {
@@ -288,7 +289,7 @@ export class BaseMap extends React.Component<Props, State> {
                     tempPolygon: [...prevState.tempPolygon, coordinate],
                 }));
             }
-        } 
+        }
         else if (
             this.state.isPenToolActive &&
             !this.props.isPolygonClosed &&
@@ -302,12 +303,19 @@ export class BaseMap extends React.Component<Props, State> {
 
     handleCompleteDrawing = () => {
         const { tempPolygon } = this.state;
-        if (tempPolygon && tempPolygon.length > 2) {
-            // Add the completed polygon to your state or dispatch an action
-            this.props.setPolygon(tempPolygon);
-            // Clear the temporary polygon
-            this.setState({ tempPolygon:  [] });
-        }
+    const { activePolygonIndex, polygonCoordinates } = this.props;
+
+    if (tempPolygon && tempPolygon.length > 2) {
+        // Merge the temporary polygon with the existing active polygon
+        const mergedPolygon = [
+            ...polygonCoordinates[activePolygonIndex],
+            ...tempPolygon,
+        ];
+
+        this.props.setPolygon(mergedPolygon);
+        // Clear the temporary polygon
+        this.setState({ tempPolygon:  [] });
+    }
     };
 
     handleMouseDownOnMap = (event: LeafletMouseEvent) => {
@@ -469,9 +477,6 @@ export class BaseMap extends React.Component<Props, State> {
         }
     };
 
-    
-    
-
     handleAddVertexInMiddleOfEdge = () => {
         if (this.state.selectedEdge === null) {
             console.error("No edge selected to add a vertex.");
@@ -483,27 +488,8 @@ export class BaseMap extends React.Component<Props, State> {
         const endPoint = activePolygon[(this.state.selectedEdge + 1) % activePolygon.length];
         // const midpoint = getMidPoint(startPoint, endPoint);
     
-        // this.props.addPointToEdge(midpoint, this.state.selectedEdge);
-        // this.setState({
-        //     selectedEdge: null
-        // });
-
+        
         let midpoint;
-
-        // if (this.state.edgeRestrictions === 'horizontal') {
-        //     midpoint = {
-        //         latitude: (startPoint.latitude + endPoint.latitude) / 2,
-        //         longitude: startPoint.longitude  // Keeps the longitude unchanged to ensure a horizontal edge.
-        //     };
-        // } else if (this.state.edgeRestrictions === 'vertical') {
-        //     midpoint = {
-        //         latitude: startPoint.latitude,  // Keeps the latitude unchanged to ensure a vertical edge.
-        //         longitude: (startPoint.longitude + endPoint.longitude) / 2
-        //     };
-        // } else {
-        //     midpoint = getMidPoint(startPoint, endPoint);  // Assuming getMidPoint() returns a Coordinate object with latitude and longitude.
-        // }
-
 
         if (this.state.edgeRelationships[this.state.selectedEdge] === 'horizontal') {
             midpoint = {
@@ -533,35 +519,6 @@ export class BaseMap extends React.Component<Props, State> {
             this.setState({ edgeRelationships: updatedEdgeRelationships });
         }
     };
-
-    // handleSetHorizontal = () => {
-    //     this.setState({ edgeRestrictions: 'horizontal' }, () => {
-    //         // Call the function to set the edge restriction in the parent component
-    //         this.props.setEdgeRestriction('horizontal');
-    //         this.setEdgeRelationship('horizontal');
-            
-    //     });
-        
-    //     if (this.state.selectedEdge !== null) {
-    //         const updatedEdgeRelationships = [...this.state.edgeRelationships];
-    //         updatedEdgeRelationships[this.state.selectedEdge] = 'horizontal';
-    //         this.setState({ edgeRelationships: updatedEdgeRelationships, selectedEdgeRestriction: 'horizontal' });
-    //     }
-    // }
-    
-    // handleSetVertical = () => {
-    //     this.setState({ edgeRestrictions: 'vertical' }, () => {
-    //         // Call the function to set the edge restriction in the parent component
-    //         this.props.setEdgeRestriction('vertical');
-    //         this.sechromeEdgeRelationship('vertical');
-    //     });
-  
-    //     if (this.state.selectedEdge !== null) {
-    //         const updatedEdgeRelationships = [...this.state.edgeRelationships];
-    //         updatedEdgeRelationships[this.state.selectedEdge] = 'vertical';
-    //         this.setState({ edgeRelationships: updatedEdgeRelationships, selectedEdgeRestriction: 'vertical' });
-    //     }
-    // }
 
     setRestriction = (direction: any) => {
         this.setState({ edgeRestrictions: direction }, () => {
