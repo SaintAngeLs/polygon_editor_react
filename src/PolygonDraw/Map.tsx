@@ -1,9 +1,11 @@
 import React, { memo } from 'react';
 import { LatLng, latLngBounds, LatLngBounds, LatLngTuple, LeafletMouseEvent } from 'leaflet';
+import L from 'leaflet';
 import { useMap, Pane, Polyline, Rectangle } from 'react-leaflet';
 import flatten from 'lodash.flatten';
 
 import { Coordinate } from 'types';
+import ReactDOMServer from 'react-dom/server';
 
 import {
     createCoordinateFromLeafletLatLng,
@@ -694,42 +696,105 @@ export class BaseMap extends React.Component<Props, State> {
     //         </EdgeVertex>
     //     ));
     // };
-    renderPolygonEdges = () => {
-        return getPolygonEdges(this.props.polygonCoordinates[this.props.activePolygonIndex])
-            .map((coordinate, index) => {
-                const isSelectedEdge = this.state.selectedEdge === index;
-                const edgeRelationship = this.state.edgeRelationships[index];
-                const isEdgeRestricted = edgeRelationship !== 'none';
+
+    // renderPolygonEdges = () => {
+    //     return getPolygonEdges(this.props.polygonCoordinates[this.props.activePolygonIndex])
+    //         .map((coordinate, index) => {
+    //             const isSelectedEdge = this.state.selectedEdge === index;
+    //             const edgeRelationship = this.state.edgeRelationships[index];
+    //             const isEdgeRestricted = edgeRelationship !== 'none';
+    //             console.log("Edge icons are generated")
     
-                return (
-                    <EdgeVertex
-                        key={index}
-                        index={index}
-                        coordinate={coordinate}
-                        onClick={() => this.handleEdgeClick(coordinate, index)}
-                        edgeRestriction={this.state.edgeRestrictions} 
-                    >
-                        {isSelectedEdge && (
-                            <div className='z-10000'>
-                                <div>Relationship: {edgeRelationship}</div>
-                                <div>Restriction: {this.state.selectedEdgeRestriction}</div>
-                                {isEdgeRestricted && (
-                                    <div className='constraint-text z-100 bg-red-900'>
-                                        Restriction: {edgeRelationship}
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                        {isSelectedEdge && isEdgeRestricted && (
-                            <div className='constraint-icon z-100 bg-red-900'>
-                                {edgeRelationship === 'horizontal' && <IconForHorizontal />}
-                                {edgeRelationship === 'vertical' && <IconForVertical />}
-                            </div>
-                        )}
-                    </EdgeVertex>
-                );
-            });
-    };
+    //             return (
+    //                 <EdgeVertex
+    //                     key={index}
+    //                     index={index}
+    //                     coordinate={coordinate}
+    //                     onClick={() => this.handleEdgeClick(coordinate, index)}
+    //                     edgeRestriction={this.state.edgeRestrictions} 
+    //                 >
+    //                     {isSelectedEdge && (
+    //                         <div className='z-100'>
+    //                             <div>Relationship: {edgeRelationship}</div>
+    //                             <div>Restriction: {this.state.selectedEdgeRestriction}</div>
+    //                             {isEdgeRestricted && (
+    //                                 <div className='constraint-text z-100 bg-red-900'>
+    //                                     Restriction: {edgeRelationship}
+    //                                 </div>
+    //                             )}
+    //                         </div>
+    //                     )}
+    //                     {isSelectedEdge && isEdgeRestricted && (
+    //                         <div className='constraint-icon z-100 bg-red-900'>
+                                
+    //                             {edgeRelationship === 'horizontal' && <IconForHorizontal />}
+    //                             {edgeRelationship === 'vertical' && <IconForVertical />}
+    //                         </div>
+    //                     )}
+    //                 </EdgeVertex>
+    //             );
+    //         });
+    // };
+    renderPolygonEdges = () => {
+        const { polygonCoordinates, activePolygonIndex } = this.props;
+        const activePolygon = polygonCoordinates[activePolygonIndex];
+    
+        if (!this.map) return null; // Ensure map is initialized
+        const map = this.map;
+    
+        const edgeVertices = getPolygonEdges(activePolygon).map((coordinate, index) => {
+          const isSelectedEdge = this.state.selectedEdge === index;
+          const edgeRelationship = this.state.edgeRelationships[index];
+          const isEdgeRestricted = edgeRelationship !== 'none';
+    
+          const nextIndex = (index + 1) % activePolygon.length;
+          const nextCoordinate = activePolygon[nextIndex];
+          const adjustment = 0.001;
+          const midpoint = {
+            lat: (coordinate.latitude + nextCoordinate.latitude) / 2 + adjustment,
+            lng: (coordinate.longitude + nextCoordinate.longitude) / 2 + adjustment,
+          };
+    
+          if (isSelectedEdge && (edgeRelationship === 'horizontal' || edgeRelationship === 'vertical')) {
+            const iconComponent = edgeRelationship === 'horizontal' ? <IconForHorizontal /> : <IconForVertical />;
+            const iconHtml = ReactDOMServer.renderToStaticMarkup(iconComponent);
+            const iconOptions = { className: 'leaflet-div-icon', html: iconHtml };
+            const icon = L.divIcon(iconOptions);
+            L.marker(midpoint, { icon }).addTo(map);
+          }
+    
+          return (
+            <EdgeVertex
+              key={index}
+              index={index}
+              coordinate={coordinate}
+              onClick={() => this.handleEdgeClick(coordinate, index)}
+              edgeRestriction={this.state.edgeRestrictions} 
+            >
+              {isSelectedEdge && (
+                <div className='z-100'>
+                  <div>Relationship: {edgeRelationship}</div>
+                  <div>Restriction: {this.state.selectedEdgeRestriction}</div>
+                  {isEdgeRestricted && (
+                    <div className='constraint-text z-100 bg-red-900'>
+                      Restriction: {edgeRelationship}
+                    </div>
+                  )}
+                </div>
+              )}
+              {isSelectedEdge && isEdgeRestricted && (
+                <div className='constraint-icon z-100 bg-red-900'>
+                  {edgeRelationship === 'horizontal' && <IconForHorizontal />}
+                  {edgeRelationship === 'vertical' && <IconForVertical />}
+                </div>
+              )}
+            </EdgeVertex>
+          );
+        });
+    
+        return <>{edgeVertices}</>;
+      };
+    
     
     
 

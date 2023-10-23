@@ -61,7 +61,7 @@ Termin oddania zadania - tydzień: 24,25 października, 2 listopada. W trakcie t
       - [X] dwie sąsiednie krawędzie nie mogą być obie pionowe lub obie poziome
       - [X] dodawanie wierzchołka na krawędzi lub usuwanie wierzchołka - usuwa ograniczenia "przyległych" krawędzi
       - [ ] ustawione ograniczenia są widoczne (jako odpowiednie "ikonki") przy środku krawędzi
-      - [ ] powinna istnieć mozliwość usuwania relacji
+      - [X] powinna istnieć mozliwość usuwania relacji
 - [ ] Włączanie/wyłączanie wielokąta odsuniętego.
    - [ ] dla prawidłowego wielokąta (zamknięta łamana bez samoprzecięć) - wielokąt odsunięty nie ma samoprzecięć!
    - [ ] może istnieć kilka składowych (spójnych) wielokąta odsuniętego
