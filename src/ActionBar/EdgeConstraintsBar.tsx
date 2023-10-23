@@ -1,4 +1,5 @@
-import React, { FunctionComponent, useState } from 'react';
+import { EdgeRestriction } from 'PolygonDraw/Map';
+import React, { FunctionComponent, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 const Container = styled.div`
@@ -41,10 +42,17 @@ const RadioButtonLabel = styled.label`
 export interface EdgeConstraintsBarProps {
     onSetHorizontal: (value: boolean) => void;
     onSetVertical: (value: boolean) => void;
+    onRemoveConstraint: () => void;
+    currentEdgeRestriction: EdgeRestriction;
 }
 
-export const EdgeConstraintsBar: FunctionComponent<EdgeConstraintsBarProps> = ({ onSetHorizontal, onSetVertical }) => {
+export const EdgeConstraintsBar: FunctionComponent<EdgeConstraintsBarProps> = ({ onSetHorizontal, onSetVertical, onRemoveConstraint, currentEdgeRestriction }) => {
+    
     const [selectedEdge, setSelectedEdge] = useState<string | null>(null);
+
+    useEffect(() => {
+        setSelectedEdge(currentEdgeRestriction);
+    }, [currentEdgeRestriction]);
 
     const handleEdgeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 

@@ -57,9 +57,9 @@ Termin oddania zadania - tydzień: 24,25 października, 2 listopada. W trakcie t
    - [x] przesuwanie całego wielokąta
 - [ ] Dodawanie ograniczeń (relacji) dla wybranej krawędzi:
    - [ ] możliwe ograniczenia:
-      - [ ] krawędź pozioma, krawędź pionowa
-      - [ ] dwie sąsiednie krawędzie nie mogą być obie pionowe lub obie poziome
-      - [ ] dodawanie wierzchołka na krawędzi lub usuwanie wierzchołka - usuwa ograniczenia "przyległych" krawędzi
+      - [X] krawędź pozioma, krawędź pionowa
+      - [X] dwie sąsiednie krawędzie nie mogą być obie pionowe lub obie poziome
+      - [X] dodawanie wierzchołka na krawędzi lub usuwanie wierzchołka - usuwa ograniczenia "przyległych" krawędzi
       - [ ] ustawione ograniczenia są widoczne (jako odpowiednie "ikonki") przy środku krawędzi
       - [ ] powinna istnieć mozliwość usuwania relacji
 - [ ] Włączanie/wyłączanie wielokąta odsuniętego.

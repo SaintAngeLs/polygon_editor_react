@@ -87,7 +87,7 @@ export interface State {
     edgeRestrictions: EdgeRestriction;
     isPenToolActive: boolean;
     isDrawToolActive: boolean;
-    selectedEdgeRestriction: string | null;
+    selectedEdgeRestriction: EdgeRestriction;
     newPointPosition: Coordinate | null;
     showExportPolygonModal: boolean;
     showImportPolygonModal: boolean;
@@ -464,7 +464,7 @@ export class BaseMap extends React.Component<Props, State> {
 
         const { edgeRelationships } = this.state;
        
-        const restriction = edgeRelationships[index];
+        const restriction = edgeRelationships[index] as EdgeRestriction;
         console.log(`Edge ${index} has restriction: ${restriction}`);
     
         if (this.state.selectedEdge === index) {
@@ -475,6 +475,8 @@ export class BaseMap extends React.Component<Props, State> {
             this.setState({ selectedEdge: index });
             
         }
+
+        this.setState({ selectedEdge: index, selectedEdgeRestriction: restriction });
     };
 
     handleAddVertexInMiddleOfEdge = () => {
@@ -533,7 +535,15 @@ export class BaseMap extends React.Component<Props, State> {
             this.setState({ edgeRelationships: updatedEdgeRelationships, selectedEdgeRestriction: direction });
         }
     }
-    
+
+    handleRemoveConstraint = () => {
+        if (this.state.selectedEdge !== null) {
+            const updatedEdgeRelationships = [...this.state.edgeRelationships];
+            updatedEdgeRelationships[this.state.selectedEdge] = 'none'; // or null, depending on your implementation
+            this.setState({ edgeRelationships: updatedEdgeRelationships });
+        }
+    }
+
     handleSetHorizontal = () => {
         this.setRestriction('horizontal');
     }
@@ -631,38 +641,94 @@ export class BaseMap extends React.Component<Props, State> {
     //     return getPolygonEdges(this.props.polygonCoordinates[this.props.activePolygonIndex]).map(this.renderVertexEdge);
     // };
 
-    // the new wersion of the renderVertexEdge
+    // // the new wersion of the renderVertexEdge
+    // renderPolygonEdges = () => {
+    //     return getPolygonEdges(this.props.polygonCoordinates[this.props.activePolygonIndex]).map((coordinate, index) => (
+    //         <EdgeVertex
+    //             key={index}
+    //             index={index}
+    //             coordinate={coordinate}
+    //             //onClick={this.handleEdgeClick}
+    //             onClick={() => this.handleEdgeClick(coordinate, index)}
+    //             edgeRestriction={this.state.edgeRestrictions} 
+    //         >
+    //             {this.state.selectedEdge === index && (
+    //                 // <div className='z-10000'>
+    //                 //     Relationship: {this.state.edgeRelationships[index]}
+    //                 //     <div className='z-10000'>Restriction: {this.state.selectedEdgeRestriction}</div>
+    //                 //     {/* Render icons here based on the relationship type */}
+    //                 //     {this.state.edgeRelationships[index] === 'horizontal' && (
+    //                 //     <>
+    //                 //         <IconForHorizontal />
+    //                 //         {/* {console.log("The horizontal icon is shown")} */}
+    //                 //     </>
+    //                 //     )}
+    //                 //     {this.state.edgeRelationships[index] === 'vertical' && (
+    //                 //         <>
+    //                 //             <IconForVertical />
+    //                 //             {/* {console.log("The vertical icon is shown")} */}
+    //                 //         </>
+    //                 //     )}
+    //                 // </div>
+
+    //                 this.state.selectedEdge === index && (
+    //                     <div className='z-10000'>
+    //                         Relationship: {this.state.edgeRelationships[index]}
+    //                         <div className='z-10000'>Restriction: {this.state.selectedEdgeRestriction}</div>
+    //                         {/* Render text here based on the relationship type */}
+    //                         {this.state.edgeRelationships[index] !== 'none' && (
+    //                             <div className='constraint-text z-100 bg-red-900'>
+    //                                 Restriction: {this.state.edgeRelationships[index]}
+    //                             </div>
+    //                         )}
+    //                     </div>
+                                        
+    //             ))}
+    //             // news part for generating
+    //             {this.state.selectedEdge === index && this.state.edgeRelationships[index] !== 'none' && (
+    //                 <div className='constraint-icon z-100 bg-red-900'>
+    //                     {this.state.edgeRelationships[index] === 'horizontal' && <IconForHorizontal />}
+    //                     {this.state.edgeRelationships[index] === 'vertical' && <IconForVertical />}
+    //                 </div>
+    //             )}
+    //         </EdgeVertex>
+    //     ));
+    // };
     renderPolygonEdges = () => {
-        return getPolygonEdges(this.props.polygonCoordinates[this.props.activePolygonIndex]).map((coordinate, index) => (
-            <EdgeVertex
-                key={index}
-                index={index}
-                coordinate={coordinate}
-                //onClick={this.handleEdgeClick}
-                onClick={() => this.handleEdgeClick(coordinate, index)}
-                edgeRestriction={this.state.edgeRestrictions} 
-            >
-                {this.state.selectedEdge === index && (
-                    <div className='z-10000'>
-                        Relationship: {this.state.edgeRelationships[index]}
-                        <div className='z-10000'>Restriction: {this.state.selectedEdgeRestriction}</div>
-                        {/* Render icons here based on the relationship type */}
-                        {this.state.edgeRelationships[index] === 'horizontal' && (
-                        <>
-                            <IconForHorizontal />
-                            {/* {console.log("The horizontal icon is shown")} */}
-                        </>
+        return getPolygonEdges(this.props.polygonCoordinates[this.props.activePolygonIndex])
+            .map((coordinate, index) => {
+                const isSelectedEdge = this.state.selectedEdge === index;
+                const edgeRelationship = this.state.edgeRelationships[index];
+                const isEdgeRestricted = edgeRelationship !== 'none';
+    
+                return (
+                    <EdgeVertex
+                        key={index}
+                        index={index}
+                        coordinate={coordinate}
+                        onClick={() => this.handleEdgeClick(coordinate, index)}
+                        edgeRestriction={this.state.edgeRestrictions} 
+                    >
+                        {isSelectedEdge && (
+                            <div className='z-10000'>
+                                <div>Relationship: {edgeRelationship}</div>
+                                <div>Restriction: {this.state.selectedEdgeRestriction}</div>
+                                {isEdgeRestricted && (
+                                    <div className='constraint-text z-100 bg-red-900'>
+                                        Restriction: {edgeRelationship}
+                                    </div>
+                                )}
+                            </div>
                         )}
-                        {this.state.edgeRelationships[index] === 'vertical' && (
-                            <>
-                                <IconForVertical />
-                                {/* {console.log("The vertical icon is shown")} */}
-                            </>
+                        {isSelectedEdge && isEdgeRestricted && (
+                            <div className='constraint-icon z-100 bg-red-900'>
+                                {edgeRelationship === 'horizontal' && <IconForHorizontal />}
+                                {edgeRelationship === 'vertical' && <IconForVertical />}
+                            </div>
                         )}
-                    </div>
-                )}
-            </EdgeVertex>
-        ));
+                    </EdgeVertex>
+                );
+            });
     };
     
     
@@ -806,6 +872,8 @@ export class BaseMap extends React.Component<Props, State> {
                  <EdgeConstraintsBar 
                     onSetHorizontal={this.handleSetHorizontal} 
                     onSetVertical={this.handleSetVertical} 
+                    onRemoveConstraint={this.handleRemoveConstraint} 
+                    currentEdgeRestriction={this.state.selectedEdgeRestriction}
                 />
 
                 {this.state.showExportPolygonModal && (
