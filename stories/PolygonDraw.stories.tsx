@@ -4,12 +4,12 @@ import { Meta } from '@storybook/react';
 
 import { PolygonDraw } from '../src/PolygonDraw/PolygonDraw';
 import { Coordinate } from '../src/types';
-import { BOUNDARY, POLYGON, POLYGON_ONE, POLYGON_TWO, POLYGON_THREE, POLYGON_FOUR } from './polygons';
+import { BOUNDARY, POLYGON, POLYGON_ONE, POLYGON_TWO, POLYGON_THREE, POLYGON_FOUR, POLYGON_ZERO } from './polygons';
 import { StateContainer } from './StateContainer';
 
 import 'leaflet/dist/leaflet.css';
 
-const SAMPLES: Coordinate[][] = [POLYGON_ONE, POLYGON_TWO, POLYGON_THREE, POLYGON_FOUR];
+const SAMPLES: Coordinate[][] = [POLYGON_ZERO, POLYGON_ONE, POLYGON_TWO, POLYGON_THREE, POLYGON_FOUR];
 
 const polygonChangeAction = action('polygon changed');
 const polygonClickedAction = action('polygon clicked');
@@ -124,26 +124,28 @@ export const New = () => (
     </StateContainer>
 );
 
-export const NotEditable = () => <PolygonDraw editable={false} polygon={POLYGON} boundary={BOUNDARY} />;
+// Additional development 
+
+// export const NotEditable = () => <PolygonDraw editable={false} polygon={POLYGON} boundary={BOUNDARY} />;
 
 // export const Highlighted = () => (
 //     <PolygonDraw editable={false} highlightedIndex={2} polygon={SAMPLES} boundary={BOUNDARY} />
 // );
 
-export const WithBoundary = () => (
-    <StateContainer initialState={{ polygon: POLYGON }}>
-        {(state, setState) => (
-            <PolygonDraw
-                polygon={state.polygon}
-                boundary={BOUNDARY}
-                onChange={(polygon, isValid) => {
-                    setState({ polygon });
-                    polygonChangeAction(polygon, isValid);
-                }}
-            />
-        )}
-    </StateContainer>
-);
+// export const WithBoundary = () => (
+//     <StateContainer initialState={{ polygon: POLYGON }}>
+//         {(state, setState) => (
+//             <PolygonDraw
+//                 polygon={state.polygon}
+//                 boundary={BOUNDARY}
+//                 onChange={(polygon, isValid) => {
+//                     setState({ polygon });
+//                     polygonChangeAction(polygon, isValid);
+//                 }}
+//             />
+//         )}
+//     </StateContainer>
+// );
 
 // export const WithInitialCenter = {
 //     render: () => (
