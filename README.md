@@ -16,33 +16,63 @@ We use leaflet for rendering maps. And typescript to provide a strongly typed in
 
 ### Specification (pl)
 
-- [] Możliwość dodawania nowego wielokąta, usuwania oraz edycji
-- [] Przy edycji:
+- [ ] Możliwość dodawania nowego wielokąta, usuwania oraz edycji
+- [ ] Przy edycji:
    - [x] przesuwanie wierzchołka
    - [x] usuwanie wierzchołka
    - [x] dodawanie wierzchołka w środku wybranej krawędzi
-   - [] przesuwanie całej krawędzi
-   - [] przesuwanie całego wielokąta
-- [] Dodawanie ograniczeń (relacji) dla wybranej krawędzi:
-   - [] możliwe ograniczenia:
-      - [] krawędź pozioma, krawędź pionowa
-      - [] dwie sąsiednie krawędzie nie mogą być obie pionowe lub obie poziome
-      - [] dodawanie wierzchołka na krawędzi lub usuwanie wierzchołka - usuwa ograniczenia "przyległych" krawędzi
-      - [] ustawione ograniczenia są widoczne (jako odpowiednie "ikonki") przy środku krawędzi
-      - [] powinna istnieć mozliwość usuwania relacji
-- [] Włączanie/wyłączanie wielokąta odsuniętego.
-   - [] dla prawidłowego wielokąta (zamknięta łamana bez samoprzecięć) - wielokąt odsunięty nie ma samoprzecięć!
-   - [] może istnieć kilka składowych (spójnych) wielokąta odsuniętego
-   - [] możliwość płynnej zmiany offsetu (tylko dodatni)
-   - [] płynna aktualizacja wielokąta oduniętego podczas modyfikacji wielokąta
-   - [] Rysowanie odcinków - algorytm biblioteczny i własna implementacja (alg. Bresenhama) - radiobutton
-- [] Definiowanie nowego wielokąta oraz przesuwanie - jak najbardziej intuicyjne
-- [] !!!Predefiniowana scena (min 2 wielokąty) z ograniczeniami
+   - [ ] przesuwanie całej krawędzi
+   - [ ] przesuwanie całego wielokąta
+- [ ] Dodawanie ograniczeń (relacji) dla wybranej krawędzi:
+   - [ ] możliwe ograniczenia:
+      - [ ] krawędź pozioma, krawędź pionowa
+      - [ ] dwie sąsiednie krawędzie nie mogą być obie pionowe lub obie poziome
+      - [ ] dodawanie wierzchołka na krawędzi lub usuwanie wierzchołka - usuwa ograniczenia "przyległych" krawędzi
+      - [ ] ustawione ograniczenia są widoczne (jako odpowiednie "ikonki") przy środku krawędzi
+      - [ ] powinna istnieć mozliwość usuwania relacji
+- [ ] Włączanie/wyłączanie wielokąta odsuniętego.
+   - [ ] dla prawidłowego wielokąta (zamknięta łamana bez samoprzecięć) - wielokąt odsunięty nie ma samoprzecięć!
+   - [ ] może istnieć kilka składowych (spójnych) wielokąta odsuniętego
+   - [ ] możliwość płynnej zmiany offsetu (tylko dodatni)
+   - [ ] płynna aktualizacja wielokąta oduniętego podczas modyfikacji wielokąta
+   - [ ] Rysowanie odcinków - algorytm biblioteczny i własna implementacja (alg. Bresenhama) - radiobutton
+- [ ] Definiowanie nowego wielokąta oraz przesuwanie - jak najbardziej intuicyjne
+- [ ] !!!Predefiniowana scena (min 2 wielokąty) z ograniczeniami
 Proszę również o przygotowanie prostej dokumentacji (może być w notatniku) zawierającej:
-   - [] instrukcji obsługi - "klawiszologia"
-   - [] przyjętych założeń i opisu zaimplementowanego algorytmu "relacji" oraz wyznaczania wielokąta odsuniętego
+   - [ ] instrukcji obsługi - "klawiszologia"
+   - [ ] przyjętych założeń i opisu zaimplementowanego algorytmu "relacji" oraz wyznaczania wielokąta odsuniętego
 
 Termin oddania zadania - tydzień: 24,25 października, 2 listopada. W trakcie tych zajęć - część laboratoryjna.
+
+### Dev Specification 
+
+### Specification (pl)
+
+- [x] Możliwość dodawania nowego wielokąta, usuwania oraz edycji
+- [x] Przy edycji:
+   - [x] przesuwanie wierzchołka
+   - [x] usuwanie wierzchołka
+   - [x] dodawanie wierzchołka w środku wybranej krawędzi
+   - [x] przesuwanie całej krawędzi
+   - [x] przesuwanie całego wielokąta
+- [ ] Dodawanie ograniczeń (relacji) dla wybranej krawędzi:
+   - [ ] możliwe ograniczenia:
+      - [X] krawędź pozioma, krawędź pionowa
+      - [X] dwie sąsiednie krawędzie nie mogą być obie pionowe lub obie poziome
+      - [X] dodawanie wierzchołka na krawędzi lub usuwanie wierzchołka - usuwa ograniczenia "przyległych" krawędzi
+      - [ ] ustawione ograniczenia są widoczne (jako odpowiednie "ikonki") przy środku krawędzi
+      - [X] powinna istnieć mozliwość usuwania relacji
+- [ ] Włączanie/wyłączanie wielokąta odsuniętego.
+   - [ ] dla prawidłowego wielokąta (zamknięta łamana bez samoprzecięć) - wielokąt odsunięty nie ma samoprzecięć!
+   - [ ] może istnieć kilka składowych (spójnych) wielokąta odsuniętego
+   - [ ] możliwość płynnej zmiany offsetu (tylko dodatni)
+   - [ ] płynna aktualizacja wielokąta oduniętego podczas modyfikacji wielokąta
+   - [ ] Rysowanie odcinków - algorytm biblioteczny i własna implementacja (alg. Bresenhama) - radiobutton
+- [x] Definiowanie nowego wielokąta oraz przesuwanie - jak najbardziej intuicyjne
+- [x] !!!Predefiniowana scena (min 2 wielokąty) z ograniczeniami
+Proszę również o przygotowanie prostej dokumentacji (może być w notatniku) zawierającej:
+   - [ ] instrukcji obsługi - "klawiszologia"
+   - [ ] przyjętych założeń i opisu zaimplementowanego algorytmu "relacji" oraz wyznaczania wielokąta odsuniętego
 
 ### Getting started
 

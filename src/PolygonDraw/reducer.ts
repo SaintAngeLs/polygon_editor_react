@@ -40,6 +40,7 @@ export const polygonEditReducer = (state: PolygonEditState, action: Actions): Po
                 polygons: [...action.payload],
             };
         }
+
         case SET_POLYGON: {
             return {
                 ...state,
@@ -51,6 +52,7 @@ export const polygonEditReducer = (state: PolygonEditState, action: Actions): Po
                 selection: new Set(),
             };
         }
+        
         case SET_EDGE_RESTRICTION: {
             return {
                 ...state,
@@ -175,7 +177,7 @@ export const undoablePolygonEditReducer = undoable(polygonEditReducer, {
         DESELECT_ALL_POINTS,
         CHANGE_POLYGON,
     ]),
-    // see https://github.com/omnidan/redux-undo/issues/6#issuecomment-142089793
+    
     limit: EDIT_HISTORY_LIMIT + 1,
     debug: false,
     syncFilter: true,

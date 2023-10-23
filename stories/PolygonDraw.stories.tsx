@@ -4,12 +4,12 @@ import { Meta } from '@storybook/react';
 
 import { PolygonDraw } from '../src/PolygonDraw/PolygonDraw';
 import { Coordinate } from '../src/types';
-import { BOUNDARY, POLYGON, POLYGON_ONE, POLYGON_TWO, POLYGON_THREE, POLYGON_FOUR } from './polygons';
+import { BOUNDARY, POLYGON, POLYGON_ONE, POLYGON_TWO, POLYGON_THREE, POLYGON_FOUR, POLYGON_ZERO } from './polygons';
 import { StateContainer } from './StateContainer';
 
 import 'leaflet/dist/leaflet.css';
 
-const SAMPLES: Coordinate[][] = [POLYGON_ONE, POLYGON_TWO, POLYGON_THREE, POLYGON_FOUR];
+const SAMPLES: Coordinate[][] = [POLYGON_ZERO, POLYGON_ONE, POLYGON_TWO, POLYGON_THREE, POLYGON_FOUR];
 
 const polygonChangeAction = action('polygon changed');
 const polygonClickedAction = action('polygon clicked');
@@ -23,15 +23,32 @@ const meta: Meta = {
 
 export default meta;
 
+// The defaul polygon draw is the only one polygone with the possibility to edit only this one polygone, 
+// the MoultiplePolygones is the component wiht the list of the polygones and with the ability to edit all this polygone
+// The new component is the one component with the ability co crete only the one polygone and no more.
+
+// I want to update al of this components to make it possible to add the new polugone to each of the component 
+
 export const Default = () => (
-    <StateContainer initialState={{ polygon: POLYGON }}>
+    <StateContainer initialState={{ polygons: [POLYGON] }}>
         {(state, setState) => (
             <>
                 <PolygonDraw
-                    polygon={state.polygon}
+                    //polygon={state.polygon}
+                    polygon={state.polygons[state.polygons.length - 1]}
                     editable={true} 
+                    // onChange={(polygon, isValid) => {
+                    //     setState({ polygon: polygon });
+                    //     polygonChangeAction(polygon, isValid);
+                    // }}
                     onChange={(polygon, isValid) => {
-                        setState({ polygon: polygon });
+                        const updatedPolygons = [...state.polygons];
+                        if (isValid) {
+                            updatedPolygons.push(polygon);
+                        } else {
+                            updatedPolygons[updatedPolygons.length - 1] = polygon;
+                        }
+                        setState({ polygons: updatedPolygons });
                         polygonChangeAction(polygon, isValid);
                     }}
                 />
@@ -88,12 +105,18 @@ export const MultiplePolygons = () => {
 // };
 
 export const New = () => (
-    <StateContainer initialState={{ polygon: [] as Coordinate[] }}>
+    <StateContainer initialState={{ polygons: [[]] as Coordinate[][] }}>
         {(state, setState) => (
             <PolygonDraw
-                polygon={state.polygon}
+                polygon={state.polygons[state.polygons.length - 1]}
                 onChange={(polygon, isValid) => {
-                    setState({ polygon });
+                    const updatedPolygons = [...state.polygons];
+                    if (isValid) {
+                        updatedPolygons.push(polygon); // Add a new polygon when the current one is complete.
+                    } else {
+                        updatedPolygons[updatedPolygons.length - 1] = polygon; // Update the current polygon.
+                    }
+                    setState({ polygons: updatedPolygons });
                     polygonChangeAction(polygon, isValid);
                 }}
             />
@@ -101,26 +124,28 @@ export const New = () => (
     </StateContainer>
 );
 
-export const NotEditable = () => <PolygonDraw editable={false} polygon={POLYGON} boundary={BOUNDARY} />;
+// Additional development 
+
+// export const NotEditable = () => <PolygonDraw editable={false} polygon={POLYGON} boundary={BOUNDARY} />;
 
 // export const Highlighted = () => (
 //     <PolygonDraw editable={false} highlightedIndex={2} polygon={SAMPLES} boundary={BOUNDARY} />
 // );
 
-export const WithBoundary = () => (
-    <StateContainer initialState={{ polygon: POLYGON }}>
-        {(state, setState) => (
-            <PolygonDraw
-                polygon={state.polygon}
-                boundary={BOUNDARY}
-                onChange={(polygon, isValid) => {
-                    setState({ polygon });
-                    polygonChangeAction(polygon, isValid);
-                }}
-            />
-        )}
-    </StateContainer>
-);
+// export const WithBoundary = () => (
+//     <StateContainer initialState={{ polygon: POLYGON }}>
+//         {(state, setState) => (
+//             <PolygonDraw
+//                 polygon={state.polygon}
+//                 boundary={BOUNDARY}
+//                 onChange={(polygon, isValid) => {
+//                     setState({ polygon });
+//                     polygonChangeAction(polygon, isValid);
+//                 }}
+//             />
+//         )}
+//     </StateContainer>
+// );
 
 // export const WithInitialCenter = {
 //     render: () => (

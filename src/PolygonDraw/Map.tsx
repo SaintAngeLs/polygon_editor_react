@@ -1,9 +1,11 @@
 import React, { memo } from 'react';
 import { LatLng, latLngBounds, LatLngBounds, LatLngTuple, LeafletMouseEvent } from 'leaflet';
+import L from 'leaflet';
 import { useMap, Pane, Polyline, Rectangle } from 'react-leaflet';
 import flatten from 'lodash.flatten';
 
 import { Coordinate } from 'types';
+import ReactDOMServer from 'react-dom/server';
 
 import {
     createCoordinateFromLeafletLatLng,
@@ -81,11 +83,13 @@ export interface State {
         startTime: number;
     } | null;
     selectedEdge:number | null;
-    edgeRelationships: string[], 
+    edgeRelationships: string[];
+    tempPolygon: Coordinate[];
     previousMouseMovePosition?: Coordinate;
     edgeRestrictions: EdgeRestriction;
     isPenToolActive: boolean;
     isDrawToolActive: boolean;
+    selectedEdgeRestriction: EdgeRestriction;
     newPointPosition: Coordinate | null;
     showExportPolygonModal: boolean;
     showImportPolygonModal: boolean;
@@ -104,10 +108,12 @@ export class BaseMap extends React.Component<Props, State> {
         rectangleSelection: null,
         previousMouseMovePosition: undefined,
         selectedEdge: null,
-        edgeRestrictions: null,
+        edgeRestrictions: 'none',
         edgeRelationships: [], 
+        tempPolygon: [],
         isPenToolActive: false,
         isDrawToolActive: false,
+        selectedEdgeRestriction: null,
         newPointPosition: null,
         showExportPolygonModal: false,
         showImportPolygonModal: false,
@@ -117,6 +123,7 @@ export class BaseMap extends React.Component<Props, State> {
         return {
             ...state,
             isPenToolActive: props.polygonCoordinates.length === 0 ? true : state.isPenToolActive,
+            isDrawToolActive: props.polygonCoordinates.length === 0 ? false : state.isDrawToolActive,
         };
     }
 
@@ -206,6 +213,7 @@ export class BaseMap extends React.Component<Props, State> {
         }
         this.setState({
             isPenToolActive: !this.state.isPenToolActive,
+            isDrawToolActive: false, // Ensure the "draw" tool is deactivated when switching to the "pen" tool
             newPointPosition: null,
         });
     };
@@ -215,8 +223,10 @@ export class BaseMap extends React.Component<Props, State> {
             return;
         }
         this.setState({
-            isPenToolActive: !this.state.isPenToolActive,
+            isDrawToolActive: !this.state.isDrawToolActive,
+            isPenToolActive: false, // Ensure the "pen" tool is deactivated when switching to the "draw" tool
             newPointPosition: null,
+            tempPolygon: [],
         });
     };
 
@@ -269,7 +279,20 @@ export class BaseMap extends React.Component<Props, State> {
 
     handleMapClick = (event: LeafletMouseEvent) => {
         const coordinate = createCoordinateFromLeafletLatLng(event.latlng);
-        if (
+
+        if (this.state.isDrawToolActive) {
+            // Check if the draw tool is active
+            if (!this.state.tempPolygon || this.state.tempPolygon.length === 0) {
+                // Start a new polygon if one doesn't exist
+                this.setState({ tempPolygon: [coordinate] });
+            } else {
+                // Add a new point to the existing temporary polygon
+                this.setState((prevState) => ({
+                    tempPolygon: [...prevState.tempPolygon, coordinate],
+                }));
+            }
+        }
+        else if (
             this.state.isPenToolActive &&
             !this.props.isPolygonClosed &&
             isCoordinateInPolygon(coordinate, this.props.boundaryPolygonCoordinates)
@@ -278,6 +301,23 @@ export class BaseMap extends React.Component<Props, State> {
         } else if (!this.state.isShiftPressed) {
             this.props.deselectAllPoints();
         }
+    };
+
+    handleCompleteDrawing = () => {
+        const { tempPolygon } = this.state;
+    const { activePolygonIndex, polygonCoordinates } = this.props;
+
+    if (tempPolygon && tempPolygon.length > 2) {
+        // Merge the temporary polygon with the existing active polygon
+        const mergedPolygon = [
+            ...polygonCoordinates[activePolygonIndex],
+            ...tempPolygon,
+        ];
+
+        this.props.setPolygon(mergedPolygon);
+        // Clear the temporary polygon
+        this.setState({ tempPolygon:  [] });
+    }
     };
 
     handleMouseDownOnMap = (event: LeafletMouseEvent) => {
@@ -423,17 +463,23 @@ export class BaseMap extends React.Component<Props, State> {
     };
 
     handleEdgeClick = (coordinate: Coordinate, index: number) => {
+
+        const { edgeRelationships } = this.state;
+       
+        const restriction = edgeRelationships[index] as EdgeRestriction;
+        console.log(`Edge ${index} has restriction: ${restriction}`);
+    
         if (this.state.selectedEdge === index) {
             // If the same edge is clicked, add a vertex in the middle of the edge.
             this.handleAddVertexInMiddleOfEdge();
         } else {
             // Otherwise, just set the clicked edge as the selected edge.
             this.setState({ selectedEdge: index });
+            
         }
-    };
 
-    
-    
+        this.setState({ selectedEdge: index, selectedEdgeRestriction: restriction });
+    };
 
     handleAddVertexInMiddleOfEdge = () => {
         if (this.state.selectedEdge === null) {
@@ -446,27 +492,8 @@ export class BaseMap extends React.Component<Props, State> {
         const endPoint = activePolygon[(this.state.selectedEdge + 1) % activePolygon.length];
         // const midpoint = getMidPoint(startPoint, endPoint);
     
-        // this.props.addPointToEdge(midpoint, this.state.selectedEdge);
-        // this.setState({
-        //     selectedEdge: null
-        // });
-
+        
         let midpoint;
-
-        // if (this.state.edgeRestrictions === 'horizontal') {
-        //     midpoint = {
-        //         latitude: (startPoint.latitude + endPoint.latitude) / 2,
-        //         longitude: startPoint.longitude  // Keeps the longitude unchanged to ensure a horizontal edge.
-        //     };
-        // } else if (this.state.edgeRestrictions === 'vertical') {
-        //     midpoint = {
-        //         latitude: startPoint.latitude,  // Keeps the latitude unchanged to ensure a vertical edge.
-        //         longitude: (startPoint.longitude + endPoint.longitude) / 2
-        //     };
-        // } else {
-        //     midpoint = getMidPoint(startPoint, endPoint);  // Assuming getMidPoint() returns a Coordinate object with latitude and longitude.
-        // }
-
 
         if (this.state.edgeRelationships[this.state.selectedEdge] === 'horizontal') {
             midpoint = {
@@ -497,28 +524,36 @@ export class BaseMap extends React.Component<Props, State> {
         }
     };
 
-    handleSetHorizontal = () => {
-        this.setState({ edgeRestrictions: 'horizontal' }, () => {
+    setRestriction = (direction: any) => {
+        this.setState({ edgeRestrictions: direction }, () => {
             // Call the function to set the edge restriction in the parent component
-            this.props.setEdgeRestriction('horizontal');
-            this.setEdgeRelationship('horizontal');
-            
+            this.props.setEdgeRestriction(direction);
+            this.setEdgeRelationship(direction);
         });
-        this.setState({ edgeRelationships: ['horizontal'] });
-        // Call the function to set the edge restriction in the parent component
-        this.props.setEdgeRestriction('horizontal');
+    
+        if (this.state.selectedEdge !== null) {
+            const updatedEdgeRelationships = [...this.state.edgeRelationships];
+            updatedEdgeRelationships[this.state.selectedEdge] = direction;
+            this.setState({ edgeRelationships: updatedEdgeRelationships, selectedEdgeRestriction: direction });
+        }
+    }
+
+    handleRemoveConstraint = () => {
+        if (this.state.selectedEdge !== null) {
+            const updatedEdgeRelationships = [...this.state.edgeRelationships];
+            updatedEdgeRelationships[this.state.selectedEdge] = 'none'; // or null, depending on your implementation
+            this.setState({ edgeRelationships: updatedEdgeRelationships });
+        }
+    }
+
+    handleSetHorizontal = () => {
+        this.setRestriction('horizontal');
     }
     
     handleSetVertical = () => {
-        this.setState({ edgeRestrictions: 'vertical' }, () => {
-            // Call the function to set the edge restriction in the parent component
-            this.props.setEdgeRestriction('vertical');
-            this.setEdgeRelationship('vertical');
-        });
-        this.setState({ edgeRelationships: ['vertical'] });
-    // Call the function to set the edge restriction in the parent component
-        this.props.setEdgeRestriction('vertical');
+        this.setRestriction('vertical');
     }
+    
 
     
     ///////////////////////////////////////////////////////////////////////////
@@ -608,27 +643,158 @@ export class BaseMap extends React.Component<Props, State> {
     //     return getPolygonEdges(this.props.polygonCoordinates[this.props.activePolygonIndex]).map(this.renderVertexEdge);
     // };
 
-    // the new wersion of the renderVertexEdge
+    // // the new wersion of the renderVertexEdge
+    // renderPolygonEdges = () => {
+    //     return getPolygonEdges(this.props.polygonCoordinates[this.props.activePolygonIndex]).map((coordinate, index) => (
+    //         <EdgeVertex
+    //             key={index}
+    //             index={index}
+    //             coordinate={coordinate}
+    //             //onClick={this.handleEdgeClick}
+    //             onClick={() => this.handleEdgeClick(coordinate, index)}
+    //             edgeRestriction={this.state.edgeRestrictions} 
+    //         >
+    //             {this.state.selectedEdge === index && (
+    //                 // <div className='z-10000'>
+    //                 //     Relationship: {this.state.edgeRelationships[index]}
+    //                 //     <div className='z-10000'>Restriction: {this.state.selectedEdgeRestriction}</div>
+    //                 //     {/* Render icons here based on the relationship type */}
+    //                 //     {this.state.edgeRelationships[index] === 'horizontal' && (
+    //                 //     <>
+    //                 //         <IconForHorizontal />
+    //                 //         {/* {console.log("The horizontal icon is shown")} */}
+    //                 //     </>
+    //                 //     )}
+    //                 //     {this.state.edgeRelationships[index] === 'vertical' && (
+    //                 //         <>
+    //                 //             <IconForVertical />
+    //                 //             {/* {console.log("The vertical icon is shown")} */}
+    //                 //         </>
+    //                 //     )}
+    //                 // </div>
+
+    //                 this.state.selectedEdge === index && (
+    //                     <div className='z-10000'>
+    //                         Relationship: {this.state.edgeRelationships[index]}
+    //                         <div className='z-10000'>Restriction: {this.state.selectedEdgeRestriction}</div>
+    //                         {/* Render text here based on the relationship type */}
+    //                         {this.state.edgeRelationships[index] !== 'none' && (
+    //                             <div className='constraint-text z-100 bg-red-900'>
+    //                                 Restriction: {this.state.edgeRelationships[index]}
+    //                             </div>
+    //                         )}
+    //                     </div>
+                                        
+    //             ))}
+    //             // news part for generating
+    //             {this.state.selectedEdge === index && this.state.edgeRelationships[index] !== 'none' && (
+    //                 <div className='constraint-icon z-100 bg-red-900'>
+    //                     {this.state.edgeRelationships[index] === 'horizontal' && <IconForHorizontal />}
+    //                     {this.state.edgeRelationships[index] === 'vertical' && <IconForVertical />}
+    //                 </div>
+    //             )}
+    //         </EdgeVertex>
+    //     ));
+    // };
+
+    // renderPolygonEdges = () => {
+    //     return getPolygonEdges(this.props.polygonCoordinates[this.props.activePolygonIndex])
+    //         .map((coordinate, index) => {
+    //             const isSelectedEdge = this.state.selectedEdge === index;
+    //             const edgeRelationship = this.state.edgeRelationships[index];
+    //             const isEdgeRestricted = edgeRelationship !== 'none';
+    //             console.log("Edge icons are generated")
+    
+    //             return (
+    //                 <EdgeVertex
+    //                     key={index}
+    //                     index={index}
+    //                     coordinate={coordinate}
+    //                     onClick={() => this.handleEdgeClick(coordinate, index)}
+    //                     edgeRestriction={this.state.edgeRestrictions} 
+    //                 >
+    //                     {isSelectedEdge && (
+    //                         <div className='z-100'>
+    //                             <div>Relationship: {edgeRelationship}</div>
+    //                             <div>Restriction: {this.state.selectedEdgeRestriction}</div>
+    //                             {isEdgeRestricted && (
+    //                                 <div className='constraint-text z-100 bg-red-900'>
+    //                                     Restriction: {edgeRelationship}
+    //                                 </div>
+    //                             )}
+    //                         </div>
+    //                     )}
+    //                     {isSelectedEdge && isEdgeRestricted && (
+    //                         <div className='constraint-icon z-100 bg-red-900'>
+                                
+    //                             {edgeRelationship === 'horizontal' && <IconForHorizontal />}
+    //                             {edgeRelationship === 'vertical' && <IconForVertical />}
+    //                         </div>
+    //                     )}
+    //                 </EdgeVertex>
+    //             );
+    //         });
+    // };
     renderPolygonEdges = () => {
-        return getPolygonEdges(this.props.polygonCoordinates[this.props.activePolygonIndex]).map((coordinate, index) => (
+        const { polygonCoordinates, activePolygonIndex } = this.props;
+        const activePolygon = polygonCoordinates[activePolygonIndex];
+    
+        if (!this.map) return null; // Ensure map is initialized
+        const map = this.map;
+    
+        const edgeVertices = getPolygonEdges(activePolygon).map((coordinate, index) => {
+          const isSelectedEdge = this.state.selectedEdge === index;
+          const edgeRelationship = this.state.edgeRelationships[index];
+          const isEdgeRestricted = edgeRelationship !== 'none';
+    
+          const nextIndex = (index + 1) % activePolygon.length;
+          const nextCoordinate = activePolygon[nextIndex];
+          const adjustment = 0.001;
+          const midpoint = {
+            lat: (coordinate.latitude + nextCoordinate.latitude) / 2 + adjustment,
+            lng: (coordinate.longitude + nextCoordinate.longitude) / 2 + adjustment,
+          };
+    
+          if (isSelectedEdge && (edgeRelationship === 'horizontal' || edgeRelationship === 'vertical')) {
+            const iconComponent = edgeRelationship === 'horizontal' ? <IconForHorizontal /> : <IconForVertical />;
+            const iconHtml = ReactDOMServer.renderToStaticMarkup(iconComponent);
+            const iconOptions = { className: 'leaflet-div-icon', html: iconHtml };
+            const icon = L.divIcon(iconOptions);
+            L.marker(midpoint, { icon }).addTo(map);
+          }
+    
+          return (
             <EdgeVertex
-                key={index}
-                index={index}
-                coordinate={coordinate}
-                onClick={this.handleEdgeClick}
-                edgeRestriction={this.state.edgeRestrictions} 
+              key={index}
+              index={index}
+              coordinate={coordinate}
+              onClick={() => this.handleEdgeClick(coordinate, index)}
+              edgeRestriction={this.state.edgeRestrictions} 
             >
-                {this.state.selectedEdge === index && (
-                    <div>
-                        Relationship: {this.state.edgeRelationships[index]}
-                        {/* Render icons here based on the relationship type */}
-                        {this.state.edgeRelationships[index] === 'horizontal' && <IconForHorizontal />}
-                        {this.state.edgeRelationships[index] === 'vertical' && <IconForVertical />}
+              {isSelectedEdge && (
+                <div className='z-100'>
+                  <div>Relationship: {edgeRelationship}</div>
+                  <div>Restriction: {this.state.selectedEdgeRestriction}</div>
+                  {isEdgeRestricted && (
+                    <div className='constraint-text z-100 bg-red-900'>
+                      Restriction: {edgeRelationship}
                     </div>
-                )}
+                  )}
+                </div>
+              )}
+              {isSelectedEdge && isEdgeRestricted && (
+                <div className='constraint-icon z-100 bg-red-900'>
+                  {edgeRelationship === 'horizontal' && <IconForHorizontal />}
+                  {edgeRelationship === 'vertical' && <IconForVertical />}
+                </div>
+              )}
             </EdgeVertex>
-        ));
-    };
+          );
+        });
+    
+        return <>{edgeVertices}</>;
+      };
+    
     
     
 
@@ -771,6 +937,8 @@ export class BaseMap extends React.Component<Props, State> {
                  <EdgeConstraintsBar 
                     onSetHorizontal={this.handleSetHorizontal} 
                     onSetVertical={this.handleSetVertical} 
+                    onRemoveConstraint={this.handleRemoveConstraint} 
+                    currentEdgeRestriction={this.state.selectedEdgeRestriction}
                 />
 
                 {this.state.showExportPolygonModal && (

@@ -1,7 +1,7 @@
 {
-    "name": "@freenow/react-polygon-editor",
+    "name": "@computer_graphics/react-polygon-editor",
     "version": "2.0.1",
-    "description": "A react component for displaying and drawing geo polygons",
+    "description": "A react component for displaying and drawing polygons",
     "main": "dist/index.js",
     "scripts": {
         "test": "jest",

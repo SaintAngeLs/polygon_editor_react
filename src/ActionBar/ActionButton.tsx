@@ -81,7 +81,7 @@ const renderIcon = (icon: ActionButtonIcons, inactive?: boolean, activeIconColor
 
 export interface Props {
     icon: ActionButtonIcons;
-    onClick: () => void;
+    onClick: (e?: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 
     inactive?: boolean;
     disabled?: boolean;

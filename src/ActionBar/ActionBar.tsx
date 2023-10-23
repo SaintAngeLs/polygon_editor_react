@@ -27,10 +27,10 @@ export interface Props {
 
     onFocus: () => void;
 
-    onEnableVectorMode: () => void;
+    onEnableDrawMode: (enabled?: boolean) => void;
     isVectorModeEnabled: boolean;
 
-    onEnableDrawMode: () => void;
+    onEnableVectorMode: (enabled?: boolean) => void;
     isDrawModeEnabled: boolean;
 
     onAddVertex: () => void;
@@ -60,7 +60,13 @@ export const ActionBar: FunctionComponent<Props> = ({
         {editable && (
             <>
                 <ActionButton
-                    onClick={onEnableVectorMode}
+                     onClick={(e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+                        e.stopPropagation();
+                        //if (!isVectorModeEnabled) {
+                            onEnableVectorMode(true);
+                            //onEnableDrawMode(false);
+                        //}
+                    }}
                     icon={ActionButtonIcons.VECTOR_MODE}
                     inactive={!isVectorModeEnabled}
                     aria-label={`${isVectorModeEnabled ? 'Disable Editing' : 'Enable Editing'}`}
@@ -82,14 +88,20 @@ export const ActionBar: FunctionComponent<Props> = ({
         {drawable && (
             <>
                 <ActionButton
-                    onClick={onEnableDrawMode}
+                    onClick={(e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+                        e.stopPropagation();
+                        //if (!isDrawModeEnabled) {
+                            onEnableDrawMode(true);
+                            //onEnableVectorMode(false);
+                        //}
+                    }}
                     icon={ActionButtonIcons.DRAW_MODE}
                     inactive={!isDrawModeEnabled}
                     aria-label={`${isDrawModeEnabled ? 'Disable Drawing' : 'Enable Drawing'}`}
                 >
                     {LABELS.DRAW}
                 </ActionButton>
-                <ActionButton
+                {/* <ActionButton
                     onClick={onDelete}
                     icon={ActionButtonIcons.TRASHCAN}
                     activeIconColor={FREEDOM_RED_900}
@@ -98,7 +110,7 @@ export const ActionBar: FunctionComponent<Props> = ({
                     aria-label="Delete"
                 >
                     {LABELS.DELETE}
-                </ActionButton>
+                </ActionButton> */}
             </>
         )}
         <ActionButton onClick={onAddVertex} icon={ActionButtonIcons.ADD_VERTEX}>
