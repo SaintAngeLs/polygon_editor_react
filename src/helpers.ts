@@ -1,5 +1,6 @@
 import { LatLng, LatLngBounds, LatLngTuple } from 'leaflet';
 import isEqual from 'lodash.isequal';
+import * as turf from '@turf/turf';
 
 import { Coordinate } from './types';
 
@@ -52,6 +53,18 @@ export const isCoordinateInPolygon = (coordinate: Coordinate, polygon: Coordinat
 
     return inside;
 };
+export const createOffsetCoordinates = (coordinates: Coordinate[], offsetDistance: number): Coordinate[] => {
+    const turfPolygon = turf.polygon([
+      coordinates.map(coord => [coord.longitude, coord.latitude]),
+    ]);
+  
+    const offsetPolygon = turf.transformRotate(turf.buffer(turfPolygon, -Math.abs(offsetDistance), { units: 'meters' }), 0);
+  
+    return offsetPolygon.geometry.coordinates[0].map(coord => ({
+      longitude: coord[0],
+      latitude: coord[1],
+    }));
+  };
 
 export const movePolygonCoordinates = (
     polygon: Coordinate[],
