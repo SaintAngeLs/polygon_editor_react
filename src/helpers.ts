@@ -201,14 +201,20 @@ export function bresenhamLine(x0: number, y0: number, x1: number, y1: number): C
     let points: Coordinate[] = [];
     const dx = Math.abs(x1 - x0);
     const dy = Math.abs(y1 - y0);
-    const sx = (x0 < x1) ? 1 : -1;
-    const sy = (y0 < y1) ? 1 : -1;
+    const sx = (x0 < x1) ? 0.00001 : -0.00001;
+    const sy = (y0 < y1) ? 0.00001 : -0.00001;
     let err = dx - dy;
 
-    while (true) {
-        points.push({ latitude: y0, longitude: x0 });
+    const maxIterations = 10000;
+    let iterations = 0;
 
-        if (x0 === x1 && y0 === y1) break;
+    const epsilon = 0.001; 
+
+    while (true) {
+        if (++iterations > maxIterations) break;
+        points.push({ latitude: y0, longitude: x0 });
+        
+        if (Math.abs(x0 - x1) < epsilon && Math.abs(y0 - y1) < epsilon) break;
         const e2 = 2 * err;
         if (e2 > -dy) { err -= dy; x0 += sx; }
         if (e2 < dx) { err += dx; y0 += sy; }

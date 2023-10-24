@@ -124,7 +124,7 @@ export class BaseMap extends React.Component<Props, State> {
         showImportPolygonModal: false,
         showOffsetPolygon: false,
         offsetDistance: 10, 
-        currentAlgorithm: Algorithms.ALGORITHM_1,
+        currentAlgorithm: Algorithms.ALGORITHM_2,
     };
 
     static getDerivedStateFromProps(props: Props, state: State): State {
@@ -293,8 +293,7 @@ export class BaseMap extends React.Component<Props, State> {
         const coordinate = createCoordinateFromLeafletLatLng(event.latlng);
 
         const { isPolygonClosed, polygonCoordinates, activePolygonIndex } = this.props;
-        const { currentAlgorithm } = this.state;
-
+        
         if (this.state.isDrawToolActive) {
             // Check if the draw tool is active
             if (!this.state.tempPolygon || this.state.tempPolygon.length === 0) {
@@ -307,22 +306,26 @@ export class BaseMap extends React.Component<Props, State> {
                 }));
             }
         }
-        else if (
-            this.state.isPenToolActive &&
-            !this.props.isPolygonClosed &&
-            isCoordinateInPolygon(coordinate, this.props.boundaryPolygonCoordinates)
-        ) {
-            this.props.addPoint(coordinate);
-        } else if (!isPolygonClosed && this.state.isPenToolActive && this.state.currentAlgorithm === Algorithms.ALGORITHM_2) {
-            const lastPointIndex = polygonCoordinates[activePolygonIndex].length - 1;
-            if (lastPointIndex >= 0) {
+        else if (this.state.isPenToolActive && !isPolygonClosed) {
+            if (this.state.currentAlgorithm === Algorithms.ALGORITHM_2) {
+              const lastPointIndex = polygonCoordinates[activePolygonIndex].length - 1;
+              if (lastPointIndex >= 0) {
                 const lastPoint = polygonCoordinates[activePolygonIndex][lastPointIndex];
-                const newPoint = createCoordinateFromLeafletLatLng(event.latlng); // Convert to Coordinate type
-                this.drawLineWithBresenham(lastPoint, newPoint);
+                this.drawLineWithBresenham(lastPoint, coordinate);
+                console.log("Bresenham is activated.");
+              } else {
+                // If there are no points yet in the current polygon, just add the clicked point
+                this.props.addPoint(coordinate);
+                console.log("Adding initial point to the polygon.");
+              }
+            } else if (isCoordinateInPolygon(coordinate, this.props.boundaryPolygonCoordinates)) {
+              // If not using Bresenham algorithm, just add the point (and ensure it's within the boundary)
+              this.props.addPoint(coordinate);
+              console.log('Adding the point to the map');
             }
-        } else if (!this.state.isShiftPressed) {
+          } else if (!this.state.isShiftPressed) {
             this.props.deselectAllPoints();
-        }
+          }
     };
 
     handleCompleteDrawing = () => {
@@ -539,6 +542,7 @@ export class BaseMap extends React.Component<Props, State> {
     };
 
     handleAlgorithmChange = (newAlgorithm: string) => {
+        console.log("Changing algorithm to:", newAlgorithm);
         if (Object.values(Algorithms).includes(newAlgorithm)) {
             this.setState({ currentAlgorithm: newAlgorithm });
             // You can also add any additional logic here if needed, 
@@ -548,11 +552,41 @@ export class BaseMap extends React.Component<Props, State> {
         }
     };
 
-    drawLineWithBresenham = (startCoord: Coordinate, endCoord: Coordinate) => {
-        const points = bresenhamLine(startCoord.latitude, startCoord.longitude, endCoord.latitude, endCoord.longitude);
-        // Here, you can do whatever you want with the points, like updating the state or props
-        this.props.setPolygon([...this.props.polygonCoordinates[this.props.activePolygonIndex], ...points]);
-    }
+    // drawLineWithBresenham = (startCoord: Coordinate, endCoord: Coordinate) => {
+    //     const points = bresenhamLine(startCoord.latitude, startCoord.longitude, endCoord.latitude, endCoord.longitude);
+    //     // Here, you can do whatever you want with the points, like updating the state or props
+    //     this.props.setPolygon([...this.props.polygonCoordinates[this.props.activePolygonIndex], ...points]);
+    // }
+    drawLineWithBresenham = (startPoint: Coordinate, endPoint: Coordinate) => {
+        const { addPointToEdge, activePolygonIndex } = this.props;
+      
+        const points = bresenhamLine(startPoint.longitude, startPoint.latitude, endPoint.longitude, endPoint.latitude);
+        
+        // Adding points in batches to avoid too many re-renders
+        const batchSize = 1000;
+        const addPoints = (index: number) => {
+          const batch = points.slice(index, index + batchSize);
+          this.addPointsToEdgeForBresenham(batch, activePolygonIndex);
+          console.log(`Batch start index in drawLineWithBresenham method: ${index}`);
+
+          if (index + batchSize < points.length) {
+            requestAnimationFrame(() => addPoints(index + batchSize));
+          }
+        };
+      
+        addPoints(0);
+      };
+      
+
+    addPointsToEdgeForBresenham = (points: Coordinate[], polygonIndex: number) => {
+        points.forEach(point => {
+            this.props.addPointToEdge(point, polygonIndex);
+        });
+    };
+      
+    
+      
+    
 
     setEdgeRelationship = (relationshipType: string) => {
         if (this.state.selectedEdge !== null) {
