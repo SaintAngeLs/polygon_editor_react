@@ -49,9 +49,21 @@ export interface EdgeConstraintsBarProps {
     onAlgorithmChange: (algorithm: string) => void; 
 }
 
-export const EdgeConstraintsBar: FunctionComponent<EdgeConstraintsBarProps> = ({ onSetHorizontal, onSetVertical, onRemoveConstraint, currentEdgeRestriction, onOffsetChange, onAlgorithmChange }) => {
+export const EdgeConstraintsBar: FunctionComponent<EdgeConstraintsBarProps> = ({ 
+    onSetHorizontal, 
+    onSetVertical, 
+    onRemoveConstraint, 
+    currentEdgeRestriction, 
+    onOffsetChange, 
+    onAlgorithmChange }) => {
+
     
-    const [selectedEdge, setSelectedEdge] = useState<string | null>(null);
+    const selectedEdgeHandle = currentEdgeRestriction === 'horizontal' ? 'horizontal' :
+        currentEdgeRestriction === 'vertical' ? 'vertical' :
+        'none';
+
+    const [selectedEdge, setSelectedEdge] = useState<string | null>(currentEdgeRestriction);
+
     const [activePolygon, setActivePolygon] = useState<string | null>(null);
     const [selectedAlgorithm, setSelectedAlgorithm] = useState<string>('library');
 
