@@ -46,12 +46,14 @@ export interface EdgeConstraintsBarProps {
     onRemoveConstraint: () => void;
     onOffsetChange: (isOffset: boolean) => void;
     currentEdgeRestriction: EdgeRestriction;
+    onAlgorithmChange: (algorithm: string) => void; 
 }
 
-export const EdgeConstraintsBar: FunctionComponent<EdgeConstraintsBarProps> = ({ onSetHorizontal, onSetVertical, onRemoveConstraint, currentEdgeRestriction, onOffsetChange }) => {
+export const EdgeConstraintsBar: FunctionComponent<EdgeConstraintsBarProps> = ({ onSetHorizontal, onSetVertical, onRemoveConstraint, currentEdgeRestriction, onOffsetChange, onAlgorithmChange }) => {
     
     const [selectedEdge, setSelectedEdge] = useState<string | null>(null);
     const [activePolygon, setActivePolygon] = useState<string | null>(null);
+    const [selectedAlgorithm, setSelectedAlgorithm] = useState<string>('library');
 
     useEffect(() => {
         setSelectedEdge(currentEdgeRestriction);
@@ -83,6 +85,11 @@ export const EdgeConstraintsBar: FunctionComponent<EdgeConstraintsBarProps> = ({
             onOffsetChange(false);
         }
     }
+    const handleAlgorithmChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const algorithm = e.target.value;
+        setSelectedAlgorithm(algorithm);
+        onAlgorithmChange(algorithm);
+      };
 
     return (
         <Container>
@@ -138,6 +145,28 @@ export const EdgeConstraintsBar: FunctionComponent<EdgeConstraintsBarProps> = ({
                         name="offsettedpolygon"
                 />
                 Off
+            </RadioButtonLabel>
+
+            <Title> Drawing Algorithm </Title>
+            <RadioButtonLabel>
+                <input 
+                type="radio" 
+                value="library-algorithm"
+                checked={selectedAlgorithm === 'library-algorithm'} 
+                onChange={handleAlgorithmChange}
+                name="drawingAlgorithm"
+                />
+                Library Algorithm
+            </RadioButtonLabel>
+            <RadioButtonLabel>
+                <input 
+                type="radio" 
+                value="bresenham-algorithm"
+                checked={selectedAlgorithm === 'bresenham-algorithm'}
+                onChange={handleAlgorithmChange}
+                name="drawingAlgorithm"
+                />
+                Bresenham Algorithm
             </RadioButtonLabel>
         </Container>
     );

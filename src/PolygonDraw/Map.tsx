@@ -17,12 +17,13 @@ import {
     isCoordinateInPolygon,
     isPolygonClosed,
     getMidPoint,
+    bresenhamLine,
 } from '../helpers';
 import { Modal } from '../common/components/Modal';
 import { ExportPolygonForm } from '../conversion/ExportPolygonForm';
 import { ImportPolygonForm } from '../conversion/ImportPolygonForm';
 //import { TileLayer } from '../leaflet/TileLayer';
-import { MAP } from '../constants';
+import { Algorithms, MAP } from '../constants';
 import { Map, Container } from '../leaflet/Map';
 import { ActionBar } from '../ActionBar/ActionBar';
 import { EdgeVertex } from './EdgeVertex';
@@ -96,6 +97,7 @@ export interface State {
     showImportPolygonModal: boolean;
     showOffsetPolygon: boolean;
     offsetDistance: number; 
+    currentAlgorithm: string;
 }
 
 export type EdgeRestriction = 'horizontal' | 'vertical' | 'none' | null;
@@ -122,6 +124,7 @@ export class BaseMap extends React.Component<Props, State> {
         showImportPolygonModal: false,
         showOffsetPolygon: false,
         offsetDistance: 10, 
+        currentAlgorithm: Algorithms.ALGORITHM_1,
     };
 
     static getDerivedStateFromProps(props: Props, state: State): State {
@@ -289,6 +292,9 @@ export class BaseMap extends React.Component<Props, State> {
     handleMapClick = (event: LeafletMouseEvent) => {
         const coordinate = createCoordinateFromLeafletLatLng(event.latlng);
 
+        const { isPolygonClosed, polygonCoordinates, activePolygonIndex } = this.props;
+        const { currentAlgorithm } = this.state;
+
         if (this.state.isDrawToolActive) {
             // Check if the draw tool is active
             if (!this.state.tempPolygon || this.state.tempPolygon.length === 0) {
@@ -307,6 +313,13 @@ export class BaseMap extends React.Component<Props, State> {
             isCoordinateInPolygon(coordinate, this.props.boundaryPolygonCoordinates)
         ) {
             this.props.addPoint(coordinate);
+        } else if (!isPolygonClosed && this.state.isPenToolActive && this.state.currentAlgorithm === Algorithms.ALGORITHM_2) {
+            const lastPointIndex = polygonCoordinates[activePolygonIndex].length - 1;
+            if (lastPointIndex >= 0) {
+                const lastPoint = polygonCoordinates[activePolygonIndex][lastPointIndex];
+                const newPoint = createCoordinateFromLeafletLatLng(event.latlng); // Convert to Coordinate type
+                this.drawLineWithBresenham(lastPoint, newPoint);
+            }
         } else if (!this.state.isShiftPressed) {
             this.props.deselectAllPoints();
         }
@@ -524,6 +537,22 @@ export class BaseMap extends React.Component<Props, State> {
             selectedEdge: null
         });
     };
+
+    handleAlgorithmChange = (newAlgorithm: string) => {
+        if (Object.values(Algorithms).includes(newAlgorithm)) {
+            this.setState({ currentAlgorithm: newAlgorithm });
+            // You can also add any additional logic here if needed, 
+            // such as re-rendering the map, recalculating data, etc.
+        } else {
+            console.error("Attempted to switch to an invalid algorithm:", newAlgorithm);
+        }
+    };
+
+    drawLineWithBresenham = (startCoord: Coordinate, endCoord: Coordinate) => {
+        const points = bresenhamLine(startCoord.latitude, startCoord.longitude, endCoord.latitude, endCoord.longitude);
+        // Here, you can do whatever you want with the points, like updating the state or props
+        this.props.setPolygon([...this.props.polygonCoordinates[this.props.activePolygonIndex], ...points]);
+    }
 
     setEdgeRelationship = (relationshipType: string) => {
         if (this.state.selectedEdge !== null) {
@@ -973,6 +1002,7 @@ export class BaseMap extends React.Component<Props, State> {
                     onRemoveConstraint={this.handleRemoveConstraint} 
                     currentEdgeRestriction={this.state.selectedEdgeRestriction}
                     onOffsetChange={this.handleOffsetChange}
+                    onAlgorithmChange={this.handleAlgorithmChange}
                 />
 
                 {this.state.showExportPolygonModal && (

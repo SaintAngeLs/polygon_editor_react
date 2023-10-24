@@ -67,7 +67,7 @@ Termin oddania zadania - tydzień: 24,25 października, 2 listopada. W trakcie t
    - [X] może istnieć kilka składowych (spójnych) wielokąta odsuniętego
    - [X] możliwość płynnej zmiany offsetu (tylko dodatni)
    - [X] płynna aktualizacja wielokąta oduniętego podczas modyfikacji wielokąta
-   - [X] Rysowanie odcinków - algorytm biblioteczny i własna implementacja (alg. Bresenhama) - radiobutton
+   - [] Rysowanie odcinków - algorytm biblioteczny i własna implementacja (alg. Bresenhama) - radiobutton
 - [x] Definiowanie nowego wielokąta oraz przesuwanie - jak najbardziej intuicyjne
 - [x] !!!Predefiniowana scena (min 2 wielokąty) z ograniczeniami
 Proszę również o przygotowanie prostej dokumentacji (może być w notatniku) zawierającej:
