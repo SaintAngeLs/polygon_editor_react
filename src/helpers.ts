@@ -53,18 +53,50 @@ export const isCoordinateInPolygon = (coordinate: Coordinate, polygon: Coordinat
 
     return inside;
 };
-export const createOffsetCoordinates = (coordinates: Coordinate[], offsetDistance: number): Coordinate[] => {
+// export const createOffsetCoordinates = (coordinates: Coordinate[], offsetDistance: number): Coordinate[] => {
+//     const turfPolygon = turf.polygon([
+//       coordinates.map(coord => [coord.longitude, coord.latitude]),
+//     ]);
+  
+//     const offsetPolygon = turf.transformRotate(turf.buffer(turfPolygon, -Math.abs(offsetDistance), { units: 'meters' }), 0);
+  
+//     return offsetPolygon.geometry.coordinates[0].map(coord => ({
+//       longitude: coord[0],
+//       latitude: coord[1],
+//     }));
+//   };
+export const createOffsetCoordinates = (coordinates: Coordinate[], offsetDistance: number): Coordinate[][] => {
     const turfPolygon = turf.polygon([
       coordinates.map(coord => [coord.longitude, coord.latitude]),
     ]);
   
-    const offsetPolygon = turf.transformRotate(turf.buffer(turfPolygon, -Math.abs(offsetDistance), { units: 'meters' }), 0);
+    const offsetResult = turf.buffer(turfPolygon, -Math.abs(offsetDistance), { units: 'meters' });
   
-    return offsetPolygon.geometry.coordinates[0].map(coord => ({
-      longitude: coord[0],
-      latitude: coord[1],
-    }));
+    if (!offsetResult) {
+      return [];
+    }
+  
+    let polygons: any[]; // We'll use `any` for simplicity, but in a real-world scenario, you'd want to use a more specific type
+    switch ((offsetResult.geometry.type as string)) {  // Type assertion added here
+      case 'Polygon':
+        polygons = [offsetResult.geometry.coordinates];
+        break;
+      case 'MultiPolygon':
+        polygons = offsetResult.geometry.coordinates;
+        break;
+      default:
+        return [];
+    }
+  
+    return polygons.map(polygon => {
+      return (polygon[0] as number[][]).map(coord => ({  // Type assertion added here
+        longitude: coord[0],
+        latitude: coord[1],
+      }));
+    });
   };
+  
+  
 
 export const movePolygonCoordinates = (
     polygon: Coordinate[],

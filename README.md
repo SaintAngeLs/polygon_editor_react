@@ -63,11 +63,11 @@ Termin oddania zadania - tydzień: 24,25 października, 2 listopada. W trakcie t
       - [X] ustawione ograniczenia są widoczne (jako odpowiednie "ikonki") przy środku krawędzi
       - [X] powinna istnieć mozliwość usuwania relacji
 - [ ] Włączanie/wyłączanie wielokąta odsuniętego.
-   - [ ] dla prawidłowego wielokąta (zamknięta łamana bez samoprzecięć) - wielokąt odsunięty nie ma samoprzecięć!
-   - [ ] może istnieć kilka składowych (spójnych) wielokąta odsuniętego
-   - [ ] możliwość płynnej zmiany offsetu (tylko dodatni)
-   - [ ] płynna aktualizacja wielokąta oduniętego podczas modyfikacji wielokąta
-   - [ ] Rysowanie odcinków - algorytm biblioteczny i własna implementacja (alg. Bresenhama) - radiobutton
+   - [X] dla prawidłowego wielokąta (zamknięta łamana bez samoprzecięć) - wielokąt odsunięty nie ma samoprzecięć!
+   - [X] może istnieć kilka składowych (spójnych) wielokąta odsuniętego
+   - [X] możliwość płynnej zmiany offsetu (tylko dodatni)
+   - [X] płynna aktualizacja wielokąta oduniętego podczas modyfikacji wielokąta
+   - [X] Rysowanie odcinków - algorytm biblioteczny i własna implementacja (alg. Bresenhama) - radiobutton
 - [x] Definiowanie nowego wielokąta oraz przesuwanie - jak najbardziej intuicyjne
 - [x] !!!Predefiniowana scena (min 2 wielokąty) z ograniczeniami
 Proszę również o przygotowanie prostej dokumentacji (może być w notatniku) zawierającej:

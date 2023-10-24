@@ -16,16 +16,20 @@ export const OffsetPolygon: FunctionComponent<Props> = ({ coordinates, offsetDis
         return null;
     }
 
-    const offsetCoordinates = createOffsetCoordinates(coordinates, offsetDistance);
-    const leafletCoordinates = offsetCoordinates.map(createLeafletLatLngFromCoordinate);
+    const offsetCoordinatesArray = createOffsetCoordinates(coordinates, offsetDistance);
 
     return (
-        <LeafletPolygon
-            positions={leafletCoordinates}
-            fillColor={MAP.OFFSET_POLYGON_COLOR}
-            color={MAP.OFFSET_POLYGON_COLOR}
-            weight={MAP.BORDER_WIDTH}
-            interactive={false}
-        />
+        <>
+            {offsetCoordinatesArray.map((offsetCoordinates, index) => (
+                <LeafletPolygon
+                    key={index}
+                    positions={offsetCoordinates.map(createLeafletLatLngFromCoordinate)}
+                    fillColor={MAP.OFFSET_POLYGON_COLOR}
+                    color={MAP.OFFSET_POLYGON_COLOR}
+                    weight={MAP.BORDER_WIDTH}
+                    interactive={false}
+                />
+            ))}
+        </>
     );
 };
