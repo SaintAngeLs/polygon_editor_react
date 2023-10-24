@@ -26,6 +26,7 @@ const Title = styled.div`
     border-bottom: 2px solid #ddd;
     padding-bottom: 10px;
     margin-bottom: 10px;
+    margin-top: 10px;
 `;
 
 
@@ -43,12 +44,14 @@ export interface EdgeConstraintsBarProps {
     onSetHorizontal: (value: boolean) => void;
     onSetVertical: (value: boolean) => void;
     onRemoveConstraint: () => void;
+    onOffsetChange: (isOffset: boolean) => void;
     currentEdgeRestriction: EdgeRestriction;
 }
 
-export const EdgeConstraintsBar: FunctionComponent<EdgeConstraintsBarProps> = ({ onSetHorizontal, onSetVertical, onRemoveConstraint, currentEdgeRestriction }) => {
+export const EdgeConstraintsBar: FunctionComponent<EdgeConstraintsBarProps> = ({ onSetHorizontal, onSetVertical, onRemoveConstraint, currentEdgeRestriction, onOffsetChange }) => {
     
     const [selectedEdge, setSelectedEdge] = useState<string | null>(null);
+    const [activePolygon, setActivePolygon] = useState<string | null>(null);
 
     useEffect(() => {
         setSelectedEdge(currentEdgeRestriction);
@@ -68,6 +71,16 @@ export const EdgeConstraintsBar: FunctionComponent<EdgeConstraintsBarProps> = ({
         } else if (edge === 'vertical') {
             onSetHorizontal(false);
             onSetVertical(true);
+        }
+    }
+
+    const handleOffsetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const offsetStatus = e.target.value;
+        setActivePolygon(offsetStatus);
+        if (offsetStatus === 'offsetOn') {
+            onOffsetChange(true);
+        } else {
+            onOffsetChange(false);
         }
     }
 
@@ -103,6 +116,28 @@ export const EdgeConstraintsBar: FunctionComponent<EdgeConstraintsBarProps> = ({
                     name="edgeDirection"
                 />
                 Vertical Edge
+            </RadioButtonLabel>
+
+            <Title> Offsetted polygon </Title>
+            <RadioButtonLabel>
+                <input 
+                        type="radio" 
+                        value="offsetOn"
+                        checked={activePolygon === 'offsetOn'} 
+                        onChange={handleOffsetChange}
+                        name="offsettedpolygon"
+                />
+                On
+            </RadioButtonLabel>
+            <RadioButtonLabel>
+                <input 
+                        type="radio" 
+                        value="offsetOff"
+                        checked={activePolygon === 'offsetOff'} 
+                        onChange={handleOffsetChange}
+                        name="offsettedpolygon"
+                />
+                Off
             </RadioButtonLabel>
         </Container>
     );

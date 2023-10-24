@@ -33,6 +33,7 @@ import MapInner from './MapInner';
 import { EdgeConstraintsBar } from '../ActionBar/EdgeConstraintsBar';
 import { IconForHorizontal } from '../ActionBar/Icons/IconForHorizontal';
 import { IconForVertical } from '../ActionBar/Icons/IconForVertical';
+import { OffsetPolygon } from './OffsetPolygon';
 
 interface MapSnapshot {
     reframe: boolean;
@@ -93,6 +94,8 @@ export interface State {
     newPointPosition: Coordinate | null;
     showExportPolygonModal: boolean;
     showImportPolygonModal: boolean;
+    showOffsetPolygon: boolean;
+    offsetDistance: number; 
 }
 
 export type EdgeRestriction = 'horizontal' | 'vertical' | 'none' | null;
@@ -117,6 +120,8 @@ export class BaseMap extends React.Component<Props, State> {
         newPointPosition: null,
         showExportPolygonModal: false,
         showImportPolygonModal: false,
+        showOffsetPolygon: false,
+        offsetDistance: 10, 
     };
 
     static getDerivedStateFromProps(props: Props, state: State): State {
@@ -230,6 +235,10 @@ export class BaseMap extends React.Component<Props, State> {
         });
     };
 
+    toggleOffsetPolygon = () => {
+        this.setState(prevState => ({ showOffsetPolygon: !prevState.showOffsetPolygon }));
+    }
+
     getSize = (map: MapType | null): string => {
         const container = map?.getContainer();
         return container ? `${container.clientHeight}x${container.clientWidth}` : '';
@@ -305,19 +314,19 @@ export class BaseMap extends React.Component<Props, State> {
 
     handleCompleteDrawing = () => {
         const { tempPolygon } = this.state;
-    const { activePolygonIndex, polygonCoordinates } = this.props;
+        const { activePolygonIndex, polygonCoordinates } = this.props;
 
-    if (tempPolygon && tempPolygon.length > 2) {
-        // Merge the temporary polygon with the existing active polygon
-        const mergedPolygon = [
-            ...polygonCoordinates[activePolygonIndex],
-            ...tempPolygon,
-        ];
+        if (tempPolygon && tempPolygon.length > 2) {
+            // Merge the temporary polygon with the existing active polygon
+            const mergedPolygon = [
+                ...polygonCoordinates[activePolygonIndex],
+                ...tempPolygon,
+            ];
 
-        this.props.setPolygon(mergedPolygon);
-        // Clear the temporary polygon
-        this.setState({ tempPolygon:  [] });
-    }
+            this.props.setPolygon(mergedPolygon);
+            // Clear the temporary polygon
+            this.setState({ tempPolygon:  [] });
+        }
     };
 
     handleMouseDownOnMap = (event: LeafletMouseEvent) => {
@@ -795,8 +804,32 @@ export class BaseMap extends React.Component<Props, State> {
         return <>{edgeVertices}</>;
       };
     
-    
-    
+    handleOffsetChange = (isOffsetOn: boolean) => {
+    if (isOffsetOn) {
+        // Code to set the active polygon
+        // Example: this.setActivePolygon(this.props.activePolygonIndex);
+    }
+    this.setState({ showOffsetPolygon: isOffsetOn });
+    };
+      
+    renderOffsetPolygon = () => {
+        const { polygonCoordinates, activePolygonIndex } = this.props;
+        const { showOffsetPolygon } = this.state;
+
+        if (!showOffsetPolygon || !polygonCoordinates[activePolygonIndex]) {
+            return null;
+        }
+
+        const activePolygon = polygonCoordinates[activePolygonIndex];
+
+        return (
+            <OffsetPolygon
+                coordinates={this.props.polygonCoordinates[this.props.activePolygonIndex]}
+                offsetDistance={100} 
+                show={this.state.showOffsetPolygon}
+            />
+        );
+    }
 
 
     renderInactivePolygons = () => {
@@ -910,7 +943,7 @@ export class BaseMap extends React.Component<Props, State> {
                     )}
 
                     {this.state.rectangleSelection && this.renderSelectionRectangle()}
-
+                    {this.renderOffsetPolygon()}
                     {/* <TileLayer /> */}
                     <MapInner
                         onClick={this.handleMapClick}
@@ -939,6 +972,7 @@ export class BaseMap extends React.Component<Props, State> {
                     onSetVertical={this.handleSetVertical} 
                     onRemoveConstraint={this.handleRemoveConstraint} 
                     currentEdgeRestriction={this.state.selectedEdgeRestriction}
+                    onOffsetChange={this.handleOffsetChange}
                 />
 
                 {this.state.showExportPolygonModal && (
