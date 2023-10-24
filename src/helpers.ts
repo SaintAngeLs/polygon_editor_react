@@ -208,6 +208,11 @@ export function bresenhamLine(x0: number, y0: number, x1: number, y1: number): C
     const maxIterations = 10000;
     let iterations = 0;
 
+    // numarical issus according to the small presiccion, but
+    // the React.Dom render runtime update issues resolve
+    // the case of iterations numbers supremum is also addition
+    // to the solution 
+
     const epsilon = 0.001; 
 
     while (true) {

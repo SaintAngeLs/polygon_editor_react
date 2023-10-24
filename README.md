@@ -9,12 +9,12 @@
 -   How to run locally
 -   Contribution
 
-### About
+## About
 
 React Polygon Editor provides react components for displaying and editing polygons.
 We use leaflet for rendering maps. And typescript to provide a strongly typed interface.
 
-### Specification (pl)
+## Specification (pl)
 
 - [ ] Możliwość dodawania nowego wielokąta, usuwania oraz edycji
 - [ ] Przy edycji:
@@ -44,9 +44,8 @@ Proszę również o przygotowanie prostej dokumentacji (może być w notatniku) 
 
 Termin oddania zadania - tydzień: 24,25 października, 2 listopada. W trakcie tych zajęć - część laboratoryjna.
 
-### Dev Specification 
 
-### Specification (pl)
+## DEV Specification (pl)
 
 - [x] Możliwość dodawania nowego wielokąta, usuwania oraz edycji
 - [x] Przy edycji:
@@ -67,16 +66,16 @@ Termin oddania zadania - tydzień: 24,25 października, 2 listopada. W trakcie t
    - [X] może istnieć kilka składowych (spójnych) wielokąta odsuniętego
    - [X] możliwość płynnej zmiany offsetu (tylko dodatni)
    - [X] płynna aktualizacja wielokąta oduniętego podczas modyfikacji wielokąta
-   - [] Rysowanie odcinków - algorytm biblioteczny i własna implementacja (alg. Bresenhama) - radiobutton
+   - [X] Rysowanie odcinków - algorytm biblioteczny i własna implementacja (alg. Bresenhama) - radiobutton
 - [x] Definiowanie nowego wielokąta oraz przesuwanie - jak najbardziej intuicyjne
 - [x] !!!Predefiniowana scena (min 2 wielokąty) z ograniczeniami
 Proszę również o przygotowanie prostej dokumentacji (może być w notatniku) zawierającej:
-   - [ ] instrukcji obsługi - "klawiszologia"
-   - [ ] przyjętych założeń i opisu zaimplementowanego algorytmu "relacji" oraz wyznaczania wielokąta odsuniętego
+   - [X] instrukcji obsługi - "klawiszologia"
+   - [] przyjętych założeń i opisu zaimplementowanego algorytmu "relacji" oraz wyznaczania wielokąta odsuniętego
 
-### Getting started
+## Getting started
 
-First install @freenow/react-polygon-editor:
+First install the main project with the standart procedure:
 
 ```bash
 nvm use 18 && npm install
@@ -89,11 +88,6 @@ Actualy the nice decission of the installation instruction would be to run the f
 npm i -S react react-dom react-leaflet leaflet styled-components
 ```
 
-If there is the need, we may also suggest injection the leaflet css style of the leaflet library.
-
-```bash
-Import 'leaflet/dist/leaflet.css';
-```
 
 Also, the one nice solution of the adding the own styling to the leafles component: linking the css style from a CDN in your index.html
 
@@ -101,9 +95,9 @@ Also, the one nice solution of the adding the own styling to the leafles compone
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" />
 ```
 
-### Components
+## Components
 
-##### PolygonDraw
+### PolygonDraw
 
 **Props**
 
@@ -126,9 +120,28 @@ This flow explains which parameters are used to focus the map:
 
 For more details, have a look at the Component definition in [PolygonDraw](src/PolygonDraw/PolygonDraw.tsx)
 
-### How to run locally
+## Skróty klawiszowe
 
-In the project, we use [storybook](https://storybook.js.org/) to illustrate what can be done with the components and the whole polygon editor.
+Dla wybrania wielokątu, proszę nacisnąć myszką na wielokąt. Dla dodania nowego poligonu: eksport (przykład przykładowego pliku dla następnego importu, znajduje się w katalogu głównym projektu; import na tym etapie implementacji projektu wspiera wyłącznie GeoJSON).
+
+- `Backspace`: Usuń zaznaczone punkty lub poligony.
+- `Shift`: (Przytrzymaj) Włącz zaznaczanie wielu punktów.
+- `p`: Przełącz tryb wektorowy.
+- `d`: Odznacz wszystkie punkty (w trybie edycji).
+- `a`: Zaznacz wszystkie punkty (w trybie edycji).
+- `f`: Reframe - Dostosuj mapę tak, aby pasowała do wszystkich poligonów.
+- `z`: Cofnij (z `Cmd`/`Ctrl`) lub Przywróć (z `Cmd`/`Ctrl` + `Shift`).
+
+## Wyjaśnienie Algorytmu Bresenhama oraz przyjęte założenia 
+Algorytm Bresenhama jest implementowany w celu narysowania linii między dwoma punktami w sposób optymalizujący liczbę punktów na linii. Funkcja bresenhamLine(x0, y0, x1, y1) przyjmuje punkt początkowy (x0, y0) oraz punkt końcowy (x1, y1) jako parametry.
+
+Ta implementacja została dostosowana do obsługi współrzędnych geograficznych (szerokość i długość geograficzna), ustawiając mały krok. Jednakże, ze względu na wysoką precyzję współrzędnych geograficznych, musimy ograniczyć liczbę iteracji, aby zapobiec nieskończonej pętli i zapewnić wydajność algorytmu względem procesu renderingu podczas uruchamiania wszystkich szczególnych komponentów (bardziej dokłądną informację istnieje szansa znależć w dokumentacji technicznej pod tytułami Node.js event loop, React.Dom, React.render()).
+
+Zmienna maxIterations jest ustawiona w celu ograniczenia liczby punktów na linii, zapobiegając problemom z wydajnością i niereagowaniem przeglądarki. Zmienna epsilon zapewnia, że nie napotkamy problemów z precyzją liczby zmiennoprzecinkowej.
+
+## How to run locally
+
+Dla wizualizacji (localnego 'IDE') został wykorzystany [storybook](https://storybook.js.org/).
 
 Simply run:
 
