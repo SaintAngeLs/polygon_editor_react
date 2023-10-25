@@ -506,7 +506,7 @@ export class BaseMap extends React.Component<Props, State> {
           const restriction = edgeRelationships[index] as EdgeRestriction;
           console.log(`Edge ${index} has restriction: ${restriction}`);
           this.setState({ selectedEdge: index, selectedEdgeRestriction: restriction });
-          this.updateEdgeMarkers();
+          //this.updateEdgeMarkers();
         }
     };
 
@@ -832,9 +832,7 @@ export class BaseMap extends React.Component<Props, State> {
         //   const nextIndex = (index + 1) % activePolygon.length;
         //   const nextCoordinate = activePolygon[nextIndex];
         //   const adjustment = 0.001;
-        //   const midpoint = {
-        //     lat: (coordinate.latitude + nextCoordinate.latitude) / 2 + adjustment,
-        //     lng: (coordinate.longitude + nextCoordinate.longitude) / 2 + adjustment,
+        //   const midpo dinate.longitude + nextCoordinate.longitude) / 2 + adjustment,
         //   };
     
         //   if (isSelectedEdge && (edgeRelationship === 'horizontal' || edgeRelationship === 'vertical')) {

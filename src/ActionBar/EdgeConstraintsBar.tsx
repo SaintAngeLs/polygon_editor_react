@@ -81,8 +81,10 @@ export const EdgeConstraintsBar: FunctionComponent<EdgeConstraintsBarProps> = ({
             onSetVertical(false);
         } else if (edge === 'horizontal') {
             onSetHorizontal(true);
+            
         } else if (edge === 'vertical') {
-            onSetHorizontal(false);
+            onSetVertical(true);
+            
         }
     }
 

@@ -113,13 +113,6 @@ Also, the one nice solution of the adding the own styling to the leafles compone
 -   **onMouseEnter**?: _(index: number) => void_ (called with the index of the polygon that was entered)
 -   **onMouseLeave**?: _(index: number) => void_ (called with the index of the polygon that was left)
 
-The initialCenter and initialZoom props are applicable only when both the polygon and the boundary coordinates are empty.
-This flow explains which parameters are used to focus the map:
-
-![Focus flow](map_focus_flow.png)
-
-For more details, have a look at the Component definition in [PolygonDraw](src/PolygonDraw/PolygonDraw.tsx)
-
 ## Skróty klawiszowe
 
 Dla wybrania wielokątu, proszę nacisnąć myszką na wielokąt. Dla dodania nowego poligonu: eksport (przykład przykładowego pliku dla następnego importu, znajduje się w katalogu głównym projektu; import na tym etapie implementacji projektu wspiera wyłącznie GeoJSON).
@@ -148,4 +141,34 @@ Simply run:
 ```bash
 npm install && npm start
 ```
+
+## Uruchamianie z Dockerem (UWAGA: Część urochomienia z dockerem nie jest zeimplementowana poprawnie)
+
+Aby uruchomić aplikację za pomocą Dockera, należy wykonać następujące kroki:
+
+1. **Zbuduj obraz Dockera**: Przy pierwszym uruchomieniu, lub po dokonaniu zmian w kodzie, może być konieczne zbudowanie obrazu Dockera. Aby to zrobić, otwórz terminal w katalogu projektu i wpisz poniższe polecenie:
+
+    ```bash
+    docker-compose up --build
+    ```
+
+    Polecenie to zbuduje obraz Dockera na podstawie pliku `Dockerfile`, a następnie uruchomi kontener na podstawie tego obrazu.
+
+2. **Uruchom kontener Dockera**: Jeśli obraz został już wcześniej zbudowany, możesz uruchomić kontener Dockera bez ponownego budowania obrazu:
+
+    ```bash
+    docker-compose up
+    ```
+
+3. **Otwórz aplikację w przeglądarce**: Po uruchomieniu kontenera, aplikacja powinna być dostępna pod adresem `http://localhost:6006`. Otwórz ten adres w swojej przeglądarce, aby korzystać z aplikacji.
+
+4. **Zakończ pracę kontenera**: Aby zakończyć pracę kontenera, naciśnij `Ctrl+C` w terminalu, w którym został uruchomiony. Możesz także uruchomić poniższe polecenie w innym terminalu, będąc w katalogu projektu:
+
+    ```bash
+    docker-compose down
+    ```
+
+    Polecenie to zatrzyma i usunie wszystkie kontenery zdefiniowane w `docker-compose.yml`.
+
+Powyższe instrukcje zakładają, że masz już zainstalowane Docker i Docker Compose na swoim komputerze. Jeśli nie, odwiedź oficjalną stronę Docker, aby uzyskać instrukcje instalacji: [Get Docker](https://docs.docker.com/get-docker/).
 
