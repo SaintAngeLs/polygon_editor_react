@@ -18,6 +18,7 @@ import {
     isPolygonClosed,
     getMidPoint,
     bresenhamLine,
+    styleToString,
 } from '../helpers';
 import { Modal } from '../common/components/Modal';
 import { ExportPolygonForm } from '../conversion/ExportPolygonForm';
@@ -448,7 +449,9 @@ export class BaseMap extends React.Component<Props, State> {
                 isMoveActive: true,
                 previousMouseMovePosition: createCoordinateFromLeafletLatLng(latLng),
             });
+            this.updateEdgeMarkers();
         }
+        this.updateEdgeMarkers();
     };
 
     onPolygonVertexDragStart = (latLng: LatLng, index: number) => {
@@ -505,8 +508,11 @@ export class BaseMap extends React.Component<Props, State> {
         } else {
           const restriction = edgeRelationships[index] as EdgeRestriction;
           console.log(`Edge ${index} has restriction: ${restriction}`);
-          this.setState({ selectedEdge: index, selectedEdgeRestriction: restriction });
-          this.updateEdgeMarkers();
+          this.setState({ selectedEdge: index, selectedEdgeRestriction: restriction }, () => {
+            this.updateEdgeMarkers();
+          });
+          
+          //this.updateEdgeMarkers();
         }
     };
 
@@ -536,13 +542,26 @@ export class BaseMap extends React.Component<Props, State> {
             };
         } else {
             midpoint = getMidPoint(startPoint, endPoint); // Calculate the midpoint using your existing logic.
+            this.updateEdgeMarkers();
         }
     
         this.props.addPointToEdge(midpoint, this.state.selectedEdge);
 
+        // this.setState({
+        //     selectedEdge: null
+        // });
+
+        const updatedEdgeRelationships = [...this.state.edgeRelationships];
+        updatedEdgeRelationships.splice(this.state.selectedEdge + 1, 0, 'none'); // Add 'none' for the new edge created
         this.setState({
-            selectedEdge: null
-        });
+            selectedEdge: null,
+            edgeRelationships: updatedEdgeRelationships,
+          }
+        //   , () => {
+        //     this.updateEdgeMarkers();
+        //   }
+          );
+        
     };
 
     handleAlgorithmChange = (newAlgorithm: string) => {
@@ -588,10 +607,6 @@ export class BaseMap extends React.Component<Props, State> {
         });
     };
       
-    
-      
-    
-    
 
     setEdgeRelationship = (relationshipType: string) => {
         if (this.state.selectedEdge !== null) {
@@ -829,21 +844,6 @@ export class BaseMap extends React.Component<Props, State> {
           const edgeRelationship = this.state.edgeRelationships[index];
           const isEdgeRestricted = edgeRelationship !== 'none';
     
-        //   const nextIndex = (index + 1) % activePolygon.length;
-        //   const nextCoordinate = activePolygon[nextIndex];
-        //   const adjustment = 0.001;
-        //   const midpoint = {
-        //     lat: (coordinate.latitude + nextCoordinate.latitude) / 2 + adjustment,
-        //     lng: (coordinate.longitude + nextCoordinate.longitude) / 2 + adjustment,
-        //   };
-    
-        //   if (isSelectedEdge && (edgeRelationship === 'horizontal' || edgeRelationship === 'vertical')) {
-        //     const iconComponent = edgeRelationship === 'horizontal' ? <IconForHorizontal /> : <IconForVertical />;
-        //     const iconHtml = ReactDOMServer.renderToStaticMarkup(iconComponent);
-        //     const iconOptions = { className: 'leaflet-div-icon', html: iconHtml };
-        //     const icon = L.divIcon(iconOptions);
-        //     L.marker(midpoint, { icon }).addTo(map);
-        //   }
     
           return (
             <EdgeVertex
@@ -904,7 +904,16 @@ export class BaseMap extends React.Component<Props, State> {
           if (isSelectedEdge && (edgeRelationship === 'horizontal' || edgeRelationship === 'vertical')) {
             const iconComponent = edgeRelationship === 'horizontal' ? <IconForHorizontal /> : <IconForVertical />;
             const iconHtml = ReactDOMServer.renderToStaticMarkup(iconComponent);
-            const iconOptions = { className: 'leaflet-div-icon', html: iconHtml };
+            const iconStyles = edgeRelationship === 'horizontal' 
+                    ? { backgroundColor: '#0ff', borderRadius: '20%', border: '2px solid #0ff', boxSizing: 'border-box', lineHeight: '1', /* other styles */ } 
+                    : { backgroundColor: '#0ff', borderRadius: '0', border: '2px solid #0ff', boxSizing: 'border-box', lineHeight: '1', /* other styles */ };
+
+
+            const iconOptions = { 
+                className: 'leaflet-div-icon', 
+                html: `<div style="${styleToString(iconStyles)}">${iconHtml}</div>`
+      }; 
+            
       
             let marker = L.marker(midpoint, { icon: L.divIcon(iconOptions) }).addTo(this.map!);
             return marker;
@@ -916,9 +925,7 @@ export class BaseMap extends React.Component<Props, State> {
         // Update the state with the new markers
         this.setState({ edgeMarkers: newMarkers });
       };
-      
-      
-
+     
     handleOffsetChange = (isOffsetOn: boolean) => {
     if (isOffsetOn) {
         // Code to set the active polygon
