@@ -627,6 +627,7 @@ export class BaseMap extends React.Component<Props, State> {
             updatedEdgeRelationships[selectedEdge] = direction;
             this.setState({ edgeRelationships: updatedEdgeRelationships }, () => {
                 console.log('Updated edgeRelationships:', this.state.edgeRelationships);
+                this.updateEdgeCoordinates(); 
                 this.updateEdgeMarkers();
             });
         }
@@ -651,6 +652,26 @@ export class BaseMap extends React.Component<Props, State> {
         
     }
     
+    updateEdgeCoordinates = () => {
+        const { selectedEdge, edgeRelationships } = this.state;
+        if (selectedEdge !== null) {
+          const activePolygon = [...this.props.polygonCoordinates[this.props.activePolygonIndex]];
+          const restriction = edgeRelationships[selectedEdge];
+      
+          if (restriction === 'horizontal') {
+            const avgLatitude = (activePolygon[selectedEdge].latitude + activePolygon[selectedEdge + 1].latitude) / 2;
+            activePolygon[selectedEdge].latitude = avgLatitude;
+            activePolygon[selectedEdge + 1].latitude = avgLatitude;
+          } else if (restriction === 'vertical') {
+            const avgLongitude = (activePolygon[selectedEdge].longitude + activePolygon[selectedEdge + 1].longitude) / 2;
+            activePolygon[selectedEdge].longitude = avgLongitude;
+            activePolygon[selectedEdge + 1].longitude = avgLongitude;
+          }
+      
+          this.props.setPolygon(activePolygon);
+        }
+      }
+      
 
     
     ///////////////////////////////////////////////////////////////////////////
