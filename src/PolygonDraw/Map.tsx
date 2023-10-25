@@ -18,6 +18,7 @@ import {
     isPolygonClosed,
     getMidPoint,
     bresenhamLine,
+    styleToString,
 } from '../helpers';
 import { Modal } from '../common/components/Modal';
 import { ExportPolygonForm } from '../conversion/ExportPolygonForm';
@@ -903,7 +904,16 @@ export class BaseMap extends React.Component<Props, State> {
           if (isSelectedEdge && (edgeRelationship === 'horizontal' || edgeRelationship === 'vertical')) {
             const iconComponent = edgeRelationship === 'horizontal' ? <IconForHorizontal /> : <IconForVertical />;
             const iconHtml = ReactDOMServer.renderToStaticMarkup(iconComponent);
-            const iconOptions = { className: 'leaflet-div-icon', html: iconHtml };
+            const iconStyles = edgeRelationship === 'horizontal' 
+                    ? { backgroundColor: '#0ff', borderRadius: '20%', border: '2px solid #0ff', boxSizing: 'border-box', lineHeight: '1', /* other styles */ } 
+                    : { backgroundColor: '#0ff', borderRadius: '0', border: '2px solid #0ff', boxSizing: 'border-box', lineHeight: '1', /* other styles */ };
+
+
+            const iconOptions = { 
+                className: 'leaflet-div-icon', 
+                html: `<div style="${styleToString(iconStyles)}">${iconHtml}</div>`
+      }; 
+            
       
             let marker = L.marker(midpoint, { icon: L.divIcon(iconOptions) }).addTo(this.map!);
             return marker;
@@ -915,9 +925,7 @@ export class BaseMap extends React.Component<Props, State> {
         // Update the state with the new markers
         this.setState({ edgeMarkers: newMarkers });
       };
-      
-      
-
+     
     handleOffsetChange = (isOffsetOn: boolean) => {
     if (isOffsetOn) {
         // Code to set the active polygon

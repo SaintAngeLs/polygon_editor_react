@@ -96,7 +96,14 @@ export const createOffsetCoordinates = (coordinates: Coordinate[], offsetDistanc
     });
   };
   
-  
+export function styleToString(styles: any) {
+    return Object.entries(styles).map(([key, value]) => `${camelToKebab(key)}:${value}`).join(';');
+}
+
+export function camelToKebab(str: string) {
+    return str.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+}
+
 
 export const movePolygonCoordinates = (
     polygon: Coordinate[],
