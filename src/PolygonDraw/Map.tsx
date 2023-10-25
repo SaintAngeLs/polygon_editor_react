@@ -448,7 +448,9 @@ export class BaseMap extends React.Component<Props, State> {
                 isMoveActive: true,
                 previousMouseMovePosition: createCoordinateFromLeafletLatLng(latLng),
             });
+            this.updateEdgeMarkers();
         }
+        this.updateEdgeMarkers();
     };
 
     onPolygonVertexDragStart = (latLng: LatLng, index: number) => {
@@ -505,7 +507,10 @@ export class BaseMap extends React.Component<Props, State> {
         } else {
           const restriction = edgeRelationships[index] as EdgeRestriction;
           console.log(`Edge ${index} has restriction: ${restriction}`);
-          this.setState({ selectedEdge: index, selectedEdgeRestriction: restriction });
+          this.setState({ selectedEdge: index, selectedEdgeRestriction: restriction }, () => {
+            this.updateEdgeMarkers();
+          });
+          
           //this.updateEdgeMarkers();
         }
     };
@@ -540,9 +545,19 @@ export class BaseMap extends React.Component<Props, State> {
     
         this.props.addPointToEdge(midpoint, this.state.selectedEdge);
 
+        // this.setState({
+        //     selectedEdge: null
+        // });
+
+        const updatedEdgeRelationships = [...this.state.edgeRelationships];
+        updatedEdgeRelationships.splice(this.state.selectedEdge + 1, 0, 'none'); // Add 'none' for the new edge created
         this.setState({
-            selectedEdge: null
-        });
+            selectedEdge: null,
+            edgeRelationships: updatedEdgeRelationships,
+          }, () => {
+            this.updateEdgeMarkers();
+          });
+        
     };
 
     handleAlgorithmChange = (newAlgorithm: string) => {
@@ -588,10 +603,6 @@ export class BaseMap extends React.Component<Props, State> {
         });
     };
       
-    
-      
-    
-    
 
     setEdgeRelationship = (relationshipType: string) => {
         if (this.state.selectedEdge !== null) {
@@ -829,19 +840,6 @@ export class BaseMap extends React.Component<Props, State> {
           const edgeRelationship = this.state.edgeRelationships[index];
           const isEdgeRestricted = edgeRelationship !== 'none';
     
-        //   const nextIndex = (index + 1) % activePolygon.length;
-        //   const nextCoordinate = activePolygon[nextIndex];
-        //   const adjustment = 0.001;
-        //   const midpo dinate.longitude + nextCoordinate.longitude) / 2 + adjustment,
-        //   };
-    
-        //   if (isSelectedEdge && (edgeRelationship === 'horizontal' || edgeRelationship === 'vertical')) {
-        //     const iconComponent = edgeRelationship === 'horizontal' ? <IconForHorizontal /> : <IconForVertical />;
-        //     const iconHtml = ReactDOMServer.renderToStaticMarkup(iconComponent);
-        //     const iconOptions = { className: 'leaflet-div-icon', html: iconHtml };
-        //     const icon = L.divIcon(iconOptions);
-        //     L.marker(midpoint, { icon }).addTo(map);
-        //   }
     
           return (
             <EdgeVertex
