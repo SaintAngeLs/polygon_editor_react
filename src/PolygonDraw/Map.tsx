@@ -541,6 +541,7 @@ export class BaseMap extends React.Component<Props, State> {
             };
         } else {
             midpoint = getMidPoint(startPoint, endPoint); // Calculate the midpoint using your existing logic.
+            this.updateEdgeMarkers();
         }
     
         this.props.addPointToEdge(midpoint, this.state.selectedEdge);
@@ -554,9 +555,11 @@ export class BaseMap extends React.Component<Props, State> {
         this.setState({
             selectedEdge: null,
             edgeRelationships: updatedEdgeRelationships,
-          }, () => {
-            this.updateEdgeMarkers();
-          });
+          }
+        //   , () => {
+        //     this.updateEdgeMarkers();
+        //   }
+          );
         
     };
 
