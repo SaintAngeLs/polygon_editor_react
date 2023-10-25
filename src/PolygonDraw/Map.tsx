@@ -17,12 +17,13 @@ import {
     isCoordinateInPolygon,
     isPolygonClosed,
     getMidPoint,
+    bresenhamLine,
 } from '../helpers';
 import { Modal } from '../common/components/Modal';
 import { ExportPolygonForm } from '../conversion/ExportPolygonForm';
 import { ImportPolygonForm } from '../conversion/ImportPolygonForm';
 //import { TileLayer } from '../leaflet/TileLayer';
-import { MAP } from '../constants';
+import { Algorithms, MAP } from '../constants';
 import { Map, Container } from '../leaflet/Map';
 import { ActionBar } from '../ActionBar/ActionBar';
 import { EdgeVertex } from './EdgeVertex';
@@ -96,6 +97,8 @@ export interface State {
     showImportPolygonModal: boolean;
     showOffsetPolygon: boolean;
     offsetDistance: number; 
+    currentAlgorithm: string;
+    edgeMarkers: L.Marker[];
 }
 
 export type EdgeRestriction = 'horizontal' | 'vertical' | 'none' | null;
@@ -122,6 +125,8 @@ export class BaseMap extends React.Component<Props, State> {
         showImportPolygonModal: false,
         showOffsetPolygon: false,
         offsetDistance: 10, 
+        currentAlgorithm: Algorithms.ALGORITHM_2,
+        edgeMarkers: [],
     };
 
     static getDerivedStateFromProps(props: Props, state: State): State {
@@ -135,6 +140,8 @@ export class BaseMap extends React.Component<Props, State> {
     componentDidMount() {
         this.reframe();
         this.toggleVectorMode();
+
+        this.updateEdgeMarkers();
 
         const container = this.map?.getContainer();
 
@@ -169,6 +176,11 @@ export class BaseMap extends React.Component<Props, State> {
     componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, { reframe, size }: MapSnapshot): void {
         if (reframe) {
             this.reframe();
+        }
+
+        if (this.props.polygonCoordinates !== prevProps.polygonCoordinates || 
+            this.state.selectedEdge !== prevState.selectedEdge) {
+          this.updateEdgeMarkers();
         }
 
         if (this.map && this.getSize(this.map) !== size) {
@@ -289,6 +301,8 @@ export class BaseMap extends React.Component<Props, State> {
     handleMapClick = (event: LeafletMouseEvent) => {
         const coordinate = createCoordinateFromLeafletLatLng(event.latlng);
 
+        const { isPolygonClosed, polygonCoordinates, activePolygonIndex } = this.props;
+        
         if (this.state.isDrawToolActive) {
             // Check if the draw tool is active
             if (!this.state.tempPolygon || this.state.tempPolygon.length === 0) {
@@ -301,15 +315,26 @@ export class BaseMap extends React.Component<Props, State> {
                 }));
             }
         }
-        else if (
-            this.state.isPenToolActive &&
-            !this.props.isPolygonClosed &&
-            isCoordinateInPolygon(coordinate, this.props.boundaryPolygonCoordinates)
-        ) {
-            this.props.addPoint(coordinate);
-        } else if (!this.state.isShiftPressed) {
+        else if (this.state.isPenToolActive && !isPolygonClosed) {
+            if (this.state.currentAlgorithm === Algorithms.ALGORITHM_2) {
+              const lastPointIndex = polygonCoordinates[activePolygonIndex].length - 1;
+              if (lastPointIndex >= 0) {
+                const lastPoint = polygonCoordinates[activePolygonIndex][lastPointIndex];
+                this.drawLineWithBresenham(lastPoint, coordinate);
+                console.log("Bresenham is activated.");
+              } else {
+                // If there are no points yet in the current polygon, just add the clicked point
+                this.props.addPoint(coordinate);
+                console.log("Adding initial point to the polygon.");
+              }
+            } else if (isCoordinateInPolygon(coordinate, this.props.boundaryPolygonCoordinates)) {
+              // If not using Bresenham algorithm, just add the point (and ensure it's within the boundary)
+              this.props.addPoint(coordinate);
+              console.log('Adding the point to the map');
+            }
+          } else if (!this.state.isShiftPressed) {
             this.props.deselectAllPoints();
-        }
+          }
     };
 
     handleCompleteDrawing = () => {
@@ -473,21 +498,16 @@ export class BaseMap extends React.Component<Props, State> {
 
     handleEdgeClick = (coordinate: Coordinate, index: number) => {
 
-        const { edgeRelationships } = this.state;
-       
-        const restriction = edgeRelationships[index] as EdgeRestriction;
-        console.log(`Edge ${index} has restriction: ${restriction}`);
-    
-        if (this.state.selectedEdge === index) {
-            // If the same edge is clicked, add a vertex in the middle of the edge.
-            this.handleAddVertexInMiddleOfEdge();
-        } else {
-            // Otherwise, just set the clicked edge as the selected edge.
-            this.setState({ selectedEdge: index });
-            
-        }
+        const { selectedEdge, edgeRelationships } = this.state;
 
-        this.setState({ selectedEdge: index, selectedEdgeRestriction: restriction });
+        if (selectedEdge === index) {
+          this.handleAddVertexInMiddleOfEdge();
+        } else {
+          const restriction = edgeRelationships[index] as EdgeRestriction;
+          console.log(`Edge ${index} has restriction: ${restriction}`);
+          this.setState({ selectedEdge: index, selectedEdgeRestriction: restriction });
+          this.updateEdgeMarkers();
+        }
     };
 
     handleAddVertexInMiddleOfEdge = () => {
@@ -525,27 +545,78 @@ export class BaseMap extends React.Component<Props, State> {
         });
     };
 
+    handleAlgorithmChange = (newAlgorithm: string) => {
+        console.log("Changing algorithm to:", newAlgorithm);
+        if (Object.values(Algorithms).includes(newAlgorithm)) {
+            this.setState({ currentAlgorithm: newAlgorithm });
+            // You can also add any additional logic here if needed, 
+            // such as re-rendering the map, recalculating data, etc.
+        } else {
+            console.error("Attempted to switch to an invalid algorithm:", newAlgorithm);
+        }
+    };
+
+    // drawLineWithBresenham = (startCoord: Coordinate, endCoord: Coordinate) => {
+    //     const points = bresenhamLine(startCoord.latitude, startCoord.longitude, endCoord.latitude, endCoord.longitude);
+    //     // Here, you can do whatever you want with the points, like updating the state or props
+    //     this.props.setPolygon([...this.props.polygonCoordinates[this.props.activePolygonIndex], ...points]);
+    // }
+    drawLineWithBresenham = (startPoint: Coordinate, endPoint: Coordinate) => {
+        const { addPointToEdge, activePolygonIndex } = this.props;
+      
+        const points = bresenhamLine(startPoint.longitude, startPoint.latitude, endPoint.longitude, endPoint.latitude);
+        
+        // Adding points in batches to avoid too many re-renders
+        const batchSize = 1000;
+        const addPoints = (index: number) => {
+          const batch = points.slice(index, index + batchSize);
+          this.addPointsToEdgeForBresenham(batch, activePolygonIndex);
+          console.log(`Batch start index in drawLineWithBresenham method: ${index}`);
+
+          if (index + batchSize < points.length) {
+            requestAnimationFrame(() => addPoints(index + batchSize));
+          }
+        };
+      
+        addPoints(0);
+      };
+      
+
+    addPointsToEdgeForBresenham = (points: Coordinate[], polygonIndex: number) => {
+        points.forEach(point => {
+            this.props.addPointToEdge(point, polygonIndex);
+        });
+    };
+      
+    
+      
+    
+    
+
     setEdgeRelationship = (relationshipType: string) => {
         if (this.state.selectedEdge !== null) {
             const updatedEdgeRelationships = [...this.state.edgeRelationships];
             updatedEdgeRelationships[this.state.selectedEdge] = relationshipType;
-            this.setState({ edgeRelationships: updatedEdgeRelationships });
+            this.setState((prevState) => ({
+                edgeRelationships: updatedEdgeRelationships
+              }));
+              
+            //this.setState({ edgeRelationships: updatedEdgeRelationships });
         }
     };
 
     setRestriction = (direction: any) => {
-        this.setState({ edgeRestrictions: direction }, () => {
-            // Call the function to set the edge restriction in the parent component
-            this.props.setEdgeRestriction(direction);
-            this.setEdgeRelationship(direction);
-        });
-    
-        if (this.state.selectedEdge !== null) {
-            const updatedEdgeRelationships = [...this.state.edgeRelationships];
-            updatedEdgeRelationships[this.state.selectedEdge] = direction;
-            this.setState({ edgeRelationships: updatedEdgeRelationships, selectedEdgeRestriction: direction });
+        const { selectedEdge, edgeRelationships } = this.state;
+        if (selectedEdge !== null) {
+            const updatedEdgeRelationships = [...edgeRelationships];
+            updatedEdgeRelationships[selectedEdge] = direction;
+            this.setState({ edgeRelationships: updatedEdgeRelationships }, () => {
+                console.log('Updated edgeRelationships:', this.state.edgeRelationships);
+                this.updateEdgeMarkers();
+            });
         }
     }
+    
 
     handleRemoveConstraint = () => {
         if (this.state.selectedEdge !== null) {
@@ -557,10 +628,12 @@ export class BaseMap extends React.Component<Props, State> {
 
     handleSetHorizontal = () => {
         this.setRestriction('horizontal');
+        
     }
     
     handleSetVertical = () => {
         this.setRestriction('vertical');
+        
     }
     
 
@@ -756,21 +829,21 @@ export class BaseMap extends React.Component<Props, State> {
           const edgeRelationship = this.state.edgeRelationships[index];
           const isEdgeRestricted = edgeRelationship !== 'none';
     
-          const nextIndex = (index + 1) % activePolygon.length;
-          const nextCoordinate = activePolygon[nextIndex];
-          const adjustment = 0.001;
-          const midpoint = {
-            lat: (coordinate.latitude + nextCoordinate.latitude) / 2 + adjustment,
-            lng: (coordinate.longitude + nextCoordinate.longitude) / 2 + adjustment,
-          };
+        //   const nextIndex = (index + 1) % activePolygon.length;
+        //   const nextCoordinate = activePolygon[nextIndex];
+        //   const adjustment = 0.001;
+        //   const midpoint = {
+        //     lat: (coordinate.latitude + nextCoordinate.latitude) / 2 + adjustment,
+        //     lng: (coordinate.longitude + nextCoordinate.longitude) / 2 + adjustment,
+        //   };
     
-          if (isSelectedEdge && (edgeRelationship === 'horizontal' || edgeRelationship === 'vertical')) {
-            const iconComponent = edgeRelationship === 'horizontal' ? <IconForHorizontal /> : <IconForVertical />;
-            const iconHtml = ReactDOMServer.renderToStaticMarkup(iconComponent);
-            const iconOptions = { className: 'leaflet-div-icon', html: iconHtml };
-            const icon = L.divIcon(iconOptions);
-            L.marker(midpoint, { icon }).addTo(map);
-          }
+        //   if (isSelectedEdge && (edgeRelationship === 'horizontal' || edgeRelationship === 'vertical')) {
+        //     const iconComponent = edgeRelationship === 'horizontal' ? <IconForHorizontal /> : <IconForVertical />;
+        //     const iconHtml = ReactDOMServer.renderToStaticMarkup(iconComponent);
+        //     const iconOptions = { className: 'leaflet-div-icon', html: iconHtml };
+        //     const icon = L.divIcon(iconOptions);
+        //     L.marker(midpoint, { icon }).addTo(map);
+        //   }
     
           return (
             <EdgeVertex
@@ -780,7 +853,7 @@ export class BaseMap extends React.Component<Props, State> {
               onClick={() => this.handleEdgeClick(coordinate, index)}
               edgeRestriction={this.state.edgeRestrictions} 
             >
-              {isSelectedEdge && (
+              {/* {isSelectedEdge && (
                 <div className='z-100'>
                   <div>Relationship: {edgeRelationship}</div>
                   <div>Restriction: {this.state.selectedEdgeRestriction}</div>
@@ -796,14 +869,56 @@ export class BaseMap extends React.Component<Props, State> {
                   {edgeRelationship === 'horizontal' && <IconForHorizontal />}
                   {edgeRelationship === 'vertical' && <IconForVertical />}
                 </div>
-              )}
+              )} */}
             </EdgeVertex>
           );
         });
     
         return <>{edgeVertices}</>;
-      };
+    };
     
+    updateEdgeMarkers = () => {
+        const { polygonCoordinates, activePolygonIndex } = this.props;
+        const activePolygon = polygonCoordinates[activePolygonIndex];
+      
+        if (!this.map || !activePolygon) return;
+      
+        // Clear existing markers
+        this.state.edgeMarkers.forEach(marker => {
+          if (marker) this.map!.removeLayer(marker);
+        });
+      
+        // Calculate and add new markers
+        const newMarkers = getPolygonEdges(activePolygon).map((coordinate, index) => {
+          const nextIndex = (index + 1) % activePolygon.length;
+          const nextCoordinate = activePolygon[nextIndex];
+          const adjustment = 0.001;
+          const midpoint = {
+            lat: (coordinate.latitude + nextCoordinate.latitude) / 2 + adjustment,
+            lng: (coordinate.longitude + nextCoordinate.longitude) / 2 + adjustment,
+          };
+      
+          const isSelectedEdge = this.state.selectedEdge === index;
+          const edgeRelationship = this.state.edgeRelationships[index];
+      
+          if (isSelectedEdge && (edgeRelationship === 'horizontal' || edgeRelationship === 'vertical')) {
+            const iconComponent = edgeRelationship === 'horizontal' ? <IconForHorizontal /> : <IconForVertical />;
+            const iconHtml = ReactDOMServer.renderToStaticMarkup(iconComponent);
+            const iconOptions = { className: 'leaflet-div-icon', html: iconHtml };
+      
+            let marker = L.marker(midpoint, { icon: L.divIcon(iconOptions) }).addTo(this.map!);
+            return marker;
+          }
+      
+          return null;
+        }).filter(marker => marker !== null) as L.Marker[];
+      
+        // Update the state with the new markers
+        this.setState({ edgeMarkers: newMarkers });
+      };
+      
+      
+
     handleOffsetChange = (isOffsetOn: boolean) => {
     if (isOffsetOn) {
         // Code to set the active polygon
@@ -973,6 +1088,7 @@ export class BaseMap extends React.Component<Props, State> {
                     onRemoveConstraint={this.handleRemoveConstraint} 
                     currentEdgeRestriction={this.state.selectedEdgeRestriction}
                     onOffsetChange={this.handleOffsetChange}
+                    onAlgorithmChange={this.handleAlgorithmChange}
                 />
 
                 {this.state.showExportPolygonModal && (

@@ -60,7 +60,7 @@ export const ImportPolygonForm: React.FC<Props> = ({ onSubmit = () => {} }) => {
             <StyledTextarea placeholder="Insert code here" value={text} onChange={(e) => setText(e.target.value)} />
             <ButtonGroup>
                 <Button type="submit" disabled={!deserialized.valid}>
-                    Importhorizontalhorizontal
+                    Import
                 </Button>
                 <Button type="button" secondary onClick={dismiss}>
                     Close

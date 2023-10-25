@@ -15,6 +15,11 @@ export const LEAFLET = {
     TILE_SERVER_URL: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
 };
 
+export const Algorithms = {
+    ALGORITHM_1: 'library-algorithm',
+    ALGORITHM_2: 'bresenham-algorithm',
+};
+
 export const MAP = {
     POLYGON_ACTIVE_COLOR: ACTION_BLUE_900,
     OFFSET_POLYGON_COLOR: AUTHENTIC_BLUE_1100,
