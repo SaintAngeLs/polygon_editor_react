@@ -3,6 +3,9 @@ import { LatLng, latLngBounds, LatLngBounds, LatLngTuple, LeafletMouseEvent } fr
 import L from 'leaflet';
 import { useMap, Pane, Polyline, Rectangle } from 'react-leaflet';
 import flatten from 'lodash.flatten';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from 'react-toastify';
+
 
 import { Coordinate } from 'types';
 import ReactDOMServer from 'react-dom/server';
@@ -620,26 +623,40 @@ export class BaseMap extends React.Component<Props, State> {
             if ((relationshipType === 'horizontal' && (updatedEdgeRelationships[prevEdgeIndex] === 'horizontal' || updatedEdgeRelationships[nextEdgeIndex] === 'horizontal')) ||
                 (relationshipType === 'vertical' && (updatedEdgeRelationships[prevEdgeIndex] === 'vertical' || updatedEdgeRelationships[nextEdgeIndex] === 'vertical'))) {
               console.warn('Adjacent edges cannot both be vertical or horizontal');
+              toast.warn("This edge already has the same restriction.", {
+                position: toast.POSITION.TOP_RIGHT,
+              });
               return;
             }
             
             updatedEdgeRelationships[this.state.selectedEdge] = relationshipType;
-            this.setState({ edgeRelationships: updatedEdgeRelationships });
-          }
-    };
-
-    setRestriction = (direction: any) => {
-        const { selectedEdge, edgeRelationships } = this.state;
-        if (selectedEdge !== null) {
-            const updatedEdgeRelationships = [...edgeRelationships];
-            updatedEdgeRelationships[selectedEdge] = direction;
             this.setState({ edgeRelationships: updatedEdgeRelationships }, () => {
                 console.log('Updated edgeRelationships:', this.state.edgeRelationships);
                 this.updateEdgeCoordinates(); 
                 this.updateEdgeMarkers();
             });
+          }
+    };
+
+    setRestriction = (direction: EdgeRestriction) => {
+        const { selectedEdge, edgeRelationships } = this.state;
+        if (typeof selectedEdge === 'number') {
+          const updatedEdgeRelationships = [...edgeRelationships];
+          if (updatedEdgeRelationships[selectedEdge] === direction) {
+            toast.warn("This edge already has the same restriction.", {
+              position: toast.POSITION.BOTTOM_LEFT,
+            });
+            return;
+          }
+          updatedEdgeRelationships[selectedEdge] = direction!;
+          this.setState({ edgeRelationships: updatedEdgeRelationships }, () => {
+            console.log('Updated edgeRelationships:', this.state.edgeRelationships);
+            this.updateEdgeCoordinates(); 
+            this.updateEdgeMarkers();
+          });
         }
-    }
+      }
+      
     
 
     handleRemoveConstraint = () => {
@@ -666,20 +683,30 @@ export class BaseMap extends React.Component<Props, State> {
           const activePolygon = [...this.props.polygonCoordinates[this.props.activePolygonIndex]];
           const restriction = edgeRelationships[selectedEdge];
       
-          if (restriction === 'horizontal') {
-            const avgLatitude = (activePolygon[selectedEdge].latitude + activePolygon[selectedEdge + 1].latitude) / 2;
-            activePolygon[selectedEdge].latitude = avgLatitude;
-            activePolygon[selectedEdge + 1].latitude = avgLatitude;
-          } else if (restriction === 'vertical') {
-            const avgLongitude = (activePolygon[selectedEdge].longitude + activePolygon[selectedEdge + 1].longitude) / 2;
-            activePolygon[selectedEdge].longitude = avgLongitude;
-            activePolygon[selectedEdge + 1].longitude = avgLongitude;
-          }
-      
-          this.props.setPolygon(activePolygon);
+          if (restriction === 'horizontal' || restriction === 'vertical') {
+            // Check adjacent edges' restrictions
+            const prevEdgeIndex = (selectedEdge - 1 + activePolygon.length) % activePolygon.length;
+            const nextEdgeIndex = (selectedEdge + 1) % activePolygon.length;
+            
+            if (edgeRelationships[prevEdgeIndex] === restriction || edgeRelationships[nextEdgeIndex] === restriction) {
+                console.warn('Adjacent edges cannot both be vertical or horizontal');
+                return;
+            }
+
+            if (restriction === 'horizontal') {
+                const avgLatitude = (activePolygon[selectedEdge].latitude + activePolygon[nextEdgeIndex].latitude) / 2;
+                activePolygon[selectedEdge].latitude = avgLatitude;
+                activePolygon[nextEdgeIndex].latitude = avgLatitude;
+            } else {
+                const avgLongitude = (activePolygon[selectedEdge].longitude + activePolygon[nextEdgeIndex].longitude) / 2;
+                activePolygon[selectedEdge].longitude = avgLongitude;
+                activePolygon[nextEdgeIndex].longitude = avgLongitude;
+            }
         }
-      }
-      
+
+        this.props.setPolygon(activePolygon);
+        }
+    }
 
     
     ///////////////////////////////////////////////////////////////////////////
