@@ -67,16 +67,16 @@ export const MultiplePolygons = () => {
     const [polygons, setPolygons] = useState(SAMPLES);
 
 
-     // Function to set restrictions on load
-     const setInitialRestrictions = () => {
-        // Example: Setting the first edge of the first polygon to be horizontal
-        polygons[0] = etRestriction(polygons[0], 0);
-        setPolygons([...polygons]);
-    };
+    //  // Function to set restrictions on load
+    //  const setInitialRestrictions = () => {
+    //     // Example: Setting the first edge of the first polygon to be horizontal
+    //     polygons[0] = etRestriction(polygons[0], 0);
+    //     setPolygons([...polygons]);
+    // };
 
-    useEffect(() => {
-        setInitialRestrictions();
-    }, []);
+    // useEffect(() => {
+    //     setInitialRestrictions();
+    // }, []);
 
     return (
         <PolygonDraw

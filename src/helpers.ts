@@ -1,8 +1,9 @@
-import { LatLng, LatLngBounds, LatLngTuple } from 'leaflet';
+import { LatLng, LatLngBounds, LatLngTuple, Polygon } from 'leaflet';
 import isEqual from 'lodash.isequal';
 import * as turf from '@turf/turf';
 
 import { Coordinate } from './types';
+import { EdgeRestriction } from 'PolygonDraw/Map';
 
 export const createLeafletLatLngTupleFromCoordinate = (coordinate: Coordinate): LatLngTuple => [
     coordinate.latitude,
@@ -234,3 +235,4 @@ export function bresenhamLine(x0: number, y0: number, x1: number, y1: number): C
 
     return points;
 }
+
