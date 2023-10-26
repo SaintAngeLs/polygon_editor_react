@@ -552,6 +552,7 @@ export class BaseMap extends React.Component<Props, State> {
         // });
 
         const updatedEdgeRelationships = [...this.state.edgeRelationships];
+        updatedEdgeRelationships[this.state.selectedEdge] = 'none';
         updatedEdgeRelationships.splice(this.state.selectedEdge + 1, 0, 'none'); // Add 'none' for the new edge created
         this.setState({
             selectedEdge: null,
@@ -611,13 +612,20 @@ export class BaseMap extends React.Component<Props, State> {
     setEdgeRelationship = (relationshipType: string) => {
         if (this.state.selectedEdge !== null) {
             const updatedEdgeRelationships = [...this.state.edgeRelationships];
+            
+            // Check adjacent edges' restrictions
+            const prevEdgeIndex = (this.state.selectedEdge - 1 + updatedEdgeRelationships.length) % updatedEdgeRelationships.length;
+            const nextEdgeIndex = (this.state.selectedEdge + 1) % updatedEdgeRelationships.length;
+            
+            if ((relationshipType === 'horizontal' && (updatedEdgeRelationships[prevEdgeIndex] === 'horizontal' || updatedEdgeRelationships[nextEdgeIndex] === 'horizontal')) ||
+                (relationshipType === 'vertical' && (updatedEdgeRelationships[prevEdgeIndex] === 'vertical' || updatedEdgeRelationships[nextEdgeIndex] === 'vertical'))) {
+              console.warn('Adjacent edges cannot both be vertical or horizontal');
+              return;
+            }
+            
             updatedEdgeRelationships[this.state.selectedEdge] = relationshipType;
-            this.setState((prevState) => ({
-                edgeRelationships: updatedEdgeRelationships
-              }));
-              
-            //this.setState({ edgeRelationships: updatedEdgeRelationships });
-        }
+            this.setState({ edgeRelationships: updatedEdgeRelationships });
+          }
     };
 
     setRestriction = (direction: any) => {
