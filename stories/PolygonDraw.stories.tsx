@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import { Meta } from '@storybook/react';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import { PolygonDraw } from '../src/PolygonDraw/PolygonDraw';
 import { Coordinate } from '../src/types';
@@ -8,6 +10,7 @@ import { BOUNDARY, POLYGON, POLYGON_ONE, POLYGON_TWO, POLYGON_THREE, POLYGON_FOU
 import { StateContainer } from './StateContainer';
 
 import 'leaflet/dist/leaflet.css';
+import { BaseMap } from '../src/PolygonDraw/Map';
 
 const SAMPLES: Coordinate[][] = [POLYGON_ZERO, POLYGON_ONE, POLYGON_TWO, POLYGON_THREE, POLYGON_FOUR];
 
@@ -18,7 +21,7 @@ const polygonMouseLeaveAction = action('polygon mouseleave');
 
 const meta: Meta = {
     title: 'PolygonDraw',
-    decorators: [(Story) => <div style={{ height: '100vh', background: 'red' }}><Story /></div>],
+    decorators: [(Story) => <div style={{ height: '100vh', background: 'red' }}><Story /><ToastContainer /></div>],
 };
 
 export default meta;
@@ -47,6 +50,7 @@ export const Default = () => (
                             updatedPolygons.push(polygon);
                         } else {
                             updatedPolygons[updatedPolygons.length - 1] = polygon;
+                            
                         }
                         setState({ polygons: updatedPolygons });
                         polygonChangeAction(polygon, isValid);
@@ -61,6 +65,18 @@ export const MultiplePolygons = () => {
     const [activeIndex, setActiveIndex] = useState(0);
     const [highlightedIndex, setHighlightedIndex] = useState<number | undefined>(undefined);
     const [polygons, setPolygons] = useState(SAMPLES);
+
+
+     // Function to set restrictions on load
+     const setInitialRestrictions = () => {
+        // Example: Setting the first edge of the first polygon to be horizontal
+        polygons[0] = etRestriction(polygons[0], 0);
+        setPolygons([...polygons]);
+    };
+
+    useEffect(() => {
+        setInitialRestrictions();
+    }, []);
 
     return (
         <PolygonDraw

@@ -129,7 +129,7 @@ export class BaseMap extends React.Component<Props, State> {
         showImportPolygonModal: false,
         showOffsetPolygon: false,
         offsetDistance: 10, 
-        currentAlgorithm: Algorithms.ALGORITHM_2,
+        currentAlgorithm: Algorithms.ALGORITHM_1,
         edgeMarkers: [],
     };
 
