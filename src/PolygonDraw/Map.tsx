@@ -472,23 +472,50 @@ export class BaseMap extends React.Component<Props, State> {
         if (this.state.isMoveActive && this.state.previousMouseMovePosition) {
             const coordinate: Coordinate = createCoordinateFromLeafletLatLng(latLng);
             const moveVector = subtractCoordinates(coordinate, this.state.previousMouseMovePosition);
-
-            const nextCoordinates = Array.from(this.props.selection)
-                .map((i) => this.props.polygonCoordinates[this.props.activePolygonIndex][i])
-                .map((coord) => addCoordinates(coord, moveVector));
-
+        
+            const polygon = this.props.polygonCoordinates[this.props.activePolygonIndex];
+            const edgeRestrictions = this.state.edgeRelationships;
+            
+            const nextCoordinates: Coordinate[] = [...polygon];
+            
+            Array.from(this.props.selection).forEach((index) => {
+              let updatedCoordinate = addCoordinates(polygon[index], moveVector);
+        
+              const edges = [(index - 1 + polygon.length) % polygon.length, index];
+              for (const edgeIndex of edges) {
+                const restriction = edgeRestrictions[edgeIndex];
+                if (restriction === 'horizontal') {
+                  updatedCoordinate.latitude = polygon[index].latitude;
+                } else if (restriction === 'vertical') {
+                  updatedCoordinate.longitude = polygon[index].longitude;
+                }
+              }
+        
+              nextCoordinates[index] = updatedCoordinate;
+              
+              // Additionally, update the adjacent vertices if they are part of a restricted edge
+              edges.forEach((edgeIndex) => {
+                const restriction = edgeRestrictions[edgeIndex];
+                const adjacentVertexIndex = (edgeIndex + 1) % polygon.length;
+                if (restriction === 'horizontal') {
+                  nextCoordinates[adjacentVertexIndex] = { ...nextCoordinates[adjacentVertexIndex], latitude: updatedCoordinate.latitude };
+                } else if (restriction === 'vertical') {
+                  nextCoordinates[adjacentVertexIndex] = { ...nextCoordinates[adjacentVertexIndex], longitude: updatedCoordinate.longitude };
+                }
+              });
+            });
+        
             const inBoundary = nextCoordinates.every((nextCoordinate) =>
-                isCoordinateInPolygon(nextCoordinate, this.props.boundaryPolygonCoordinates)
+              isCoordinateInPolygon(nextCoordinate, this.props.boundaryPolygonCoordinates)
             );
-
+        
             if (inBoundary) {
-                this.props.moveSelectedPoints(moveVector);
-                this.setState({ previousMouseMovePosition: coordinate, isMovedPointInBoundary: true });
+              this.props.setPolygon(nextCoordinates);
+              this.setState({ previousMouseMovePosition: coordinate, isMovedPointInBoundary: true });
             } else {
-                this.setState({ isMovedPointInBoundary: false });
+              this.setState({ isMovedPointInBoundary: false });
             }
-        }
-
+          }
         
     };
 
