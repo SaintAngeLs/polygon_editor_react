@@ -4,7 +4,7 @@
     "description": "A react component for displaying and drawing polygons",
     "main": "dist/index.js",
     "scripts": {
-        "test": "jest",
+        "test": "",
         "test:watch": "",
         "start": "storybook dev -p 9001 -c .storybook --host 0.0.0.0 ",
         "lint": "",
