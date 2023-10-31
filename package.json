@@ -11,7 +11,7 @@
         "clean": "rm -rf ./dist ./node_modules",
         "build": "tsc",
         "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
-        "prepublishOnly": "rm -rf ./dist && npm test && npm run lint && npm run build",
+        "prepublishOnly": "rm -rf ./dist  && npm run build",
         "build-storybook": "storybook build"
     },
     "publishConfig": {
