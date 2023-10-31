@@ -6,7 +6,7 @@
     "scripts": {
         
         "start": "storybook dev -p 9001 -c .storybook --host 0.0.0.0 ",
-        
+        "lint": "",
         "clean": "rm -rf ./dist ./node_modules",
         "build": "tsc",
         "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
