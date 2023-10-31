@@ -4,7 +4,7 @@ import L from 'leaflet';
 import { useMap, Pane, Polyline, Rectangle } from 'react-leaflet';
 import flatten from 'lodash.flatten';
 import 'react-toastify/dist/ReactToastify.css';
-import { ToastContainer, toast } from 'react-toastify';
+//import { ToastContainer, toast } from 'react-toastify';
 
 
 import { Coordinate } from 'types';
@@ -585,7 +585,7 @@ export class BaseMap extends React.Component<Props, State> {
     //     this.props.setPolygon([...this.props.polygonCoordinates[this.props.activePolygonIndex], ...points]);
     // }
     drawLineWithBresenham = (startPoint: Coordinate, endPoint: Coordinate) => {
-        const { addPointToEdge, activePolygonIndex } = this.props;
+        const { activePolygonIndex } = this.props;
       
         const points = bresenhamLine(startPoint.longitude, startPoint.latitude, endPoint.longitude, endPoint.latitude);
         
@@ -623,9 +623,9 @@ export class BaseMap extends React.Component<Props, State> {
             if ((relationshipType === 'horizontal' && (updatedEdgeRelationships[prevEdgeIndex] === 'horizontal' || updatedEdgeRelationships[nextEdgeIndex] === 'horizontal')) ||
                 (relationshipType === 'vertical' && (updatedEdgeRelationships[prevEdgeIndex] === 'vertical' || updatedEdgeRelationships[nextEdgeIndex] === 'vertical'))) {
               console.warn('Adjacent edges cannot both be vertical or horizontal');
-              toast.warn("This edge already has the same restriction.", {
-                position: toast.POSITION.TOP_RIGHT,
-              });
+                //   toast.warn("This edge already has the same restriction.", {
+                //     position: toast.POSITION.TOP_RIGHT,
+                //   });
               return;
             }
             
@@ -643,9 +643,9 @@ export class BaseMap extends React.Component<Props, State> {
         if (typeof selectedEdge === 'number') {
           const updatedEdgeRelationships = [...edgeRelationships];
           if (updatedEdgeRelationships[selectedEdge] === direction) {
-            toast.warn("This edge already has the same restriction.", {
-              position: toast.POSITION.BOTTOM_LEFT,
-            });
+            // toast.warn("This edge already has the same restriction.", {
+            //   position: toast.POSITION.BOTTOM_LEFT,
+            // });
             return;
           }
           updatedEdgeRelationships[selectedEdge] = direction!;
@@ -797,12 +797,12 @@ export class BaseMap extends React.Component<Props, State> {
         const activePolygon = polygonCoordinates[activePolygonIndex];
     
         if (!this.map) return null; // Ensure map is initialized
-        const map = this.map;
+        // const map = this.map;
     
         const edgeVertices = getPolygonEdges(activePolygon).map((coordinate, index) => {
-          const isSelectedEdge = this.state.selectedEdge === index;
-          const edgeRelationship = this.state.edgeRelationships[index];
-          const isEdgeRestricted = edgeRelationship !== 'none';
+          // const isSelectedEdge = this.state.selectedEdge === index;
+          // const edgeRelationship = this.state.edgeRelationships[index];
+          // const isEdgeRestricted = edgeRelationship !== 'none';
     
     
           return (
@@ -902,7 +902,7 @@ export class BaseMap extends React.Component<Props, State> {
             return null;
         }
 
-        const activePolygon = polygonCoordinates[activePolygonIndex];
+        // const activePolygon = polygonCoordinates[activePolygonIndex];
 
         return (
             <OffsetPolygon

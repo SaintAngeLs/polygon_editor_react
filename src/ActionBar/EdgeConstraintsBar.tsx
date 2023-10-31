@@ -58,7 +58,7 @@ export const EdgeConstraintsBar: FunctionComponent<EdgeConstraintsBarProps> = ({
     onAlgorithmChange }) => {
 
     
-    const selectedEdgeHandle = currentEdgeRestriction === 'horizontal' ? 'horizontal' :
+    //const selectedEdgeHandle = currentEdgeRestriction === 'horizontal' ? 'horizontal' :
         currentEdgeRestriction === 'vertical' ? 'vertical' :
         'none';
 
