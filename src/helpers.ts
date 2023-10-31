@@ -213,7 +213,7 @@ export function bresenhamLine(x0: number, y0: number, x1: number, y1: number): C
     const sy = (y0 < y1) ? 0.00001 : -0.00001;
     let err = dx - dy;
 
-    const maxIterations = 10000;
+    const maxIterations = 1000000;
     let iterations = 0;
 
     // numarical issus according to the small presiccion, but
@@ -221,7 +221,7 @@ export function bresenhamLine(x0: number, y0: number, x1: number, y1: number): C
     // the case of iterations numbers supremum is also addition
     // to the solution 
 
-    const epsilon = 0.001; 
+    const epsilon = 0.0000000001; 
 
     while (true) {
         if (++iterations > maxIterations) break;

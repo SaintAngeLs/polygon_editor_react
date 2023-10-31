@@ -159,7 +159,7 @@ export const EdgeConstraintsBar: FunctionComponent<EdgeConstraintsBarProps> = ({
                 Off
             </RadioButtonLabel>
 
-            <Title> Drawing Algorithm </Title>
+            <Title> Line Drawing</Title>
             <RadioButtonLabel>
                 <input 
                 type="radio" 
