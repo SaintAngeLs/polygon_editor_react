@@ -58,7 +58,7 @@ export const EdgeConstraintsBar: FunctionComponent<EdgeConstraintsBarProps> = ({
     onAlgorithmChange }) => {
 
     
-    const selectedEdgeHandle = currentEdgeRestriction === 'horizontal' ? 'horizontal' :
+    //const selectedEdgeHandle = currentEdgeRestriction === 'horizontal' ? 'horizontal' :
         currentEdgeRestriction === 'vertical' ? 'vertical' :
         'none';
 
@@ -159,7 +159,7 @@ export const EdgeConstraintsBar: FunctionComponent<EdgeConstraintsBarProps> = ({
                 Off
             </RadioButtonLabel>
 
-            <Title> Drawing Algorithm </Title>
+            <Title> Line Drawing</Title>
             <RadioButtonLabel>
                 <input 
                 type="radio" 

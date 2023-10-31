@@ -85,7 +85,7 @@ export const ActionBar: FunctionComponent<Props> = ({
                 </ActionButton>
             </>
         )}
-        {drawable && (
+        {!drawable && (
             <>
                 <ActionButton
                     onClick={(e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
