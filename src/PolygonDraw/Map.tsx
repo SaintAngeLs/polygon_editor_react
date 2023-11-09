@@ -320,9 +320,19 @@ export class BaseMap extends React.Component<Props, State> {
                 this.setState({ tempPolygon: [coordinate] });
             } else {
                 // Add a new point to the existing temporary polygon
+                // this.setState((prevState) => ({
+                //     tempPolygon: [...prevState.tempPolygon, coordinate],
+                // }));
+
                 this.setState((prevState) => ({
                     tempPolygon: [...prevState.tempPolygon, coordinate],
-                }));
+                  }), () => {
+                    // After setting the new point, apply auto relations if active
+                    if (this.state.autoRelationsActive) {
+                      // Apply auto relations to the last edge of tempPolygon
+                      this.applyAutoRelationsToNewEdge();
+                    }
+                  });
             }
         }
         else if (this.state.isPenToolActive && !isPolygonClosed) {
@@ -335,17 +345,61 @@ export class BaseMap extends React.Component<Props, State> {
               } else {
                 // If there are no points yet in the current polygon, just add the clicked point
                 this.props.addPoint(coordinate);
+                if (this.state.autoRelationsActive) {
+                    // Apply auto relations to the last edge of tempPolygon
+                    this.applyAutoRelationsToNewEdge();
+                  }
                 console.log("Adding initial point to the polygon.");
               }
             } else if (isCoordinateInPolygon(coordinate, this.props.boundaryPolygonCoordinates)) {
               // If not using Bresenham algorithm, just add the point (and ensure it's within the boundary)
               this.props.addPoint(coordinate);
+               // Update the temporary polygon state with the new point
+                this.setState((prevState) => ({
+                    tempPolygon: [...prevState.tempPolygon, coordinate],
+                }), () => {
+                    // After setting the new point, check and apply auto relations if active
+                    if (this.state.autoRelationsActive && this.state.tempPolygon.length > 1) {
+                        console.log("THe new relation was set up")
+                        this.applyAutoRelationsToNewEdge();
+                    }
+                });
               console.log('Adding the point to the map');
             }
           } else if (!this.state.isShiftPressed) {
             this.props.deselectAllPoints();
           }
     };
+
+    applyAutoRelationsToNewEdge = () => {
+        const { tempPolygon } = this.state;
+        if (tempPolygon.length > 1) {
+          const lastVertexIndex = tempPolygon.length - 1;
+          const lastVertex = tempPolygon[lastVertexIndex];
+          const secondLastVertex = tempPolygon[lastVertexIndex - 1];
+      
+          // Calculate the movement direction
+          const deltaX = Math.abs(lastVertex.longitude - secondLastVertex.longitude);
+          const deltaY = Math.abs(lastVertex.latitude - secondLastVertex.latitude);
+      
+          // Determine if movement is more horizontal or vertical
+          const isHorizontalMove = deltaX > deltaY;
+          const isVerticalMove = deltaY > deltaX;
+      
+          if (isHorizontalMove) {
+            this.setEdgeRestrictionForIndex(lastVertexIndex - 1, 'horizontal');
+          } else if (isVerticalMove) {
+            this.setEdgeRestrictionForIndex(lastVertexIndex - 1, 'vertical');
+          }
+        }
+      };
+      
+      setEdgeRestrictionForIndex = (index: number, restrictionType: 'horizontal' | 'vertical') => {
+        const updatedEdgeRelationships = [...this.state.edgeRelationships];
+        updatedEdgeRelationships[index] = restrictionType;
+      
+        this.setState({ edgeRelationships: updatedEdgeRelationships });
+      };
 
     handleCompleteDrawing = () => {
         const { tempPolygon } = this.state;
@@ -475,6 +529,7 @@ export class BaseMap extends React.Component<Props, State> {
     };
 
     updateVertexPosition = (latLng: LatLng) => {
+        
         if (this.state.isMoveActive && this.state.previousMouseMovePosition) {
             // const coordinate: Coordinate = createCoordinateFromLeafletLatLng(latLng);
             // const moveVector = subtractCoordinates(coordinate, this.state.previousMouseMovePosition);
