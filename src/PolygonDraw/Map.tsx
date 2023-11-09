@@ -96,6 +96,7 @@ export interface State {
     isPenToolActive: boolean;
     isDrawToolActive: boolean;
     selectedEdgeRestriction: EdgeRestriction;
+    autoRelationsActive: boolean;
     newPointPosition: Coordinate | null;
     showExportPolygonModal: boolean;
     showImportPolygonModal: boolean;
@@ -130,6 +131,7 @@ export class BaseMap extends React.Component<Props, State> {
         showOffsetPolygon: false,
         offsetDistance: 10, 
         currentAlgorithm: Algorithms.ALGORITHM_1,
+        autoRelationsActive: false,
         edgeMarkers: [],
     };
 
@@ -268,6 +270,10 @@ export class BaseMap extends React.Component<Props, State> {
             this.reframe();
         }
     };
+
+    toggleAutoRelations = (isActive: boolean) => {
+        this.setState({ autoRelationsActive: isActive });
+      };
 
     ///////////////////////////////////////////////////////////////////////////
     //                          Export / Import methods                      //
@@ -470,53 +476,108 @@ export class BaseMap extends React.Component<Props, State> {
 
     updateVertexPosition = (latLng: LatLng) => {
         if (this.state.isMoveActive && this.state.previousMouseMovePosition) {
+            // const coordinate: Coordinate = createCoordinateFromLeafletLatLng(latLng);
+            // const moveVector = subtractCoordinates(coordinate, this.state.previousMouseMovePosition);
+        
+            // const polygon = this.props.polygonCoordinates[this.props.activePolygonIndex];
+            // const edgeRestrictions = this.state.edgeRelationships;
+            
+            // const nextCoordinates: Coordinate[] = [...polygon];
+            
+            // Array.from(this.props.selection).forEach((index) => {
+            //   let updatedCoordinate = addCoordinates(polygon[index], moveVector);
+        
+            //   const edges = [(index - 1 + polygon.length) % polygon.length, index];
+            //   for (const edgeIndex of edges) {
+            //     const restriction = edgeRestrictions[edgeIndex];
+            //     if (restriction === 'horizontal') {
+            //       updatedCoordinate.latitude = polygon[index].latitude;
+            //     } else if (restriction === 'vertical') {
+            //       updatedCoordinate.longitude = polygon[index].longitude;
+            //     }
+            //   }
+        
+            //   nextCoordinates[index] = updatedCoordinate;
+              
+            //   // Additionally, update the adjacent vertices if they are part of a restricted edge
+            //   edges.forEach((edgeIndex) => {
+            //     const restriction = edgeRestrictions[edgeIndex];
+            //     const adjacentVertexIndex = (edgeIndex + 1) % polygon.length;
+            //     if (restriction === 'horizontal') {
+            //       nextCoordinates[adjacentVertexIndex] = { ...nextCoordinates[adjacentVertexIndex], latitude: updatedCoordinate.latitude };
+            //     } else if (restriction === 'vertical') {
+            //       nextCoordinates[adjacentVertexIndex] = { ...nextCoordinates[adjacentVertexIndex], longitude: updatedCoordinate.longitude };
+            //     }
+            //   });
+            // });
+        
+            // const inBoundary = nextCoordinates.every((nextCoordinate) =>
+            //   isCoordinateInPolygon(nextCoordinate, this.props.boundaryPolygonCoordinates)
+            // );
+        
+            // if (inBoundary) {
+            //   this.props.setPolygon(nextCoordinates);
+            //   this.setState({ previousMouseMovePosition: coordinate, isMovedPointInBoundary: true });
+            // } else {
+            //   this.setState({ isMovedPointInBoundary: false });
+            // }
+
             const coordinate: Coordinate = createCoordinateFromLeafletLatLng(latLng);
             const moveVector = subtractCoordinates(coordinate, this.state.previousMouseMovePosition);
-        
-            const polygon = this.props.polygonCoordinates[this.props.activePolygonIndex];
-            const edgeRestrictions = this.state.edgeRelationships;
-            
-            const nextCoordinates: Coordinate[] = [...polygon];
-            
-            Array.from(this.props.selection).forEach((index) => {
-              let updatedCoordinate = addCoordinates(polygon[index], moveVector);
-        
-              const edges = [(index - 1 + polygon.length) % polygon.length, index];
-              for (const edgeIndex of edges) {
-                const restriction = edgeRestrictions[edgeIndex];
-                if (restriction === 'horizontal') {
-                  updatedCoordinate.latitude = polygon[index].latitude;
-                } else if (restriction === 'vertical') {
-                  updatedCoordinate.longitude = polygon[index].longitude;
-                }
-              }
-        
-              nextCoordinates[index] = updatedCoordinate;
-              
-              // Additionally, update the adjacent vertices if they are part of a restricted edge
-              edges.forEach((edgeIndex) => {
-                const restriction = edgeRestrictions[edgeIndex];
-                const adjacentVertexIndex = (edgeIndex + 1) % polygon.length;
-                if (restriction === 'horizontal') {
-                  nextCoordinates[adjacentVertexIndex] = { ...nextCoordinates[adjacentVertexIndex], latitude: updatedCoordinate.latitude };
-                } else if (restriction === 'vertical') {
-                  nextCoordinates[adjacentVertexIndex] = { ...nextCoordinates[adjacentVertexIndex], longitude: updatedCoordinate.longitude };
-                }
-              });
-            });
-        
+
+            const nextCoordinates = Array.from(this.props.selection)
+                .map((i) => this.props.polygonCoordinates[this.props.activePolygonIndex][i])
+                .map((coord) => addCoordinates(coord, moveVector));
+
             const inBoundary = nextCoordinates.every((nextCoordinate) =>
-              isCoordinateInPolygon(nextCoordinate, this.props.boundaryPolygonCoordinates)
+                isCoordinateInPolygon(nextCoordinate, this.props.boundaryPolygonCoordinates)
             );
-        
+
             if (inBoundary) {
-              this.props.setPolygon(nextCoordinates);
-              this.setState({ previousMouseMovePosition: coordinate, isMovedPointInBoundary: true });
+                this.props.moveSelectedPoints(moveVector);
+                this.setState({ previousMouseMovePosition: coordinate, isMovedPointInBoundary: true });
             } else {
-              this.setState({ isMovedPointInBoundary: false });
+                this.setState({ isMovedPointInBoundary: false });
             }
-          }
+        }
+
+        if (this.state.autoRelationsActive && this.state.isMoveActive && this.state.previousMouseMovePosition) {
+            const coordinate: Coordinate = createCoordinateFromLeafletLatLng(latLng);
+            // Calculate the movement direction
+            const deltaX = Math.abs(coordinate.longitude - this.state.previousMouseMovePosition.longitude);
+            const deltaY = Math.abs(coordinate.latitude - this.state.previousMouseMovePosition.latitude);
+            
+            // Determine if movement is more horizontal or vertical
+            const isHorizontalMove = deltaX > deltaY;
+            const isVerticalMove = deltaY > deltaX;
+    
+            // Apply automatic edge restrictions based on the movement
+            Array.from(this.props.selection).forEach((index) => {
+                // Get the indexes of the adjacent edges for the moving vertex
+                const edges = [(index - 1 + this.props.polygonCoordinates[this.props.activePolygonIndex].length) % this.props.polygonCoordinates[this.props.activePolygonIndex].length, index];
+                edges.forEach((edgeIndex) => {
+                    if (isHorizontalMove) {
+                        // Set edge to horizontal if the movement is more horizontal
+                        console.log("The edge restriociton is the to be the horisontal")
+                        this.setEdgeRelationship('horizontal')
+                        this.setEdgeRelationshipForIndex(edgeIndex, 'horizontal');
+                    } else if (isVerticalMove) {
+                        // Set edge to vertical if the movement is more vertical
+                        console.log("The edge restriociton is the to be the vertical")
+                        this.setEdgeRelationship('vertical')
+                        this.setEdgeRelationshipForIndex(edgeIndex, 'vertical');
+                    }
+                });
+            });
+        }
         
+    };
+
+    setEdgeRestrictionForIndex = (index: number, restrictionType: EdgeRestriction) => {
+        const updatedEdgeRelationships = [...this.state.edgeRelationships];
+        updatedEdgeRelationships[index] = restrictionType;
+        
+        this.setState({ edgeRelationships: updatedEdgeRelationships });
     };
 
     endVertexMove = () => {
@@ -587,13 +648,20 @@ export class BaseMap extends React.Component<Props, State> {
         this.setState({
             selectedEdge: null,
             edgeRelationships: updatedEdgeRelationships,
-          }
+        }
         //   , () => {
         //     this.updateEdgeMarkers();
         //   }
           );
         
     };
+
+    setEdgeRelationshipForIndex = (index: number, relationshipType: 'horizontal' | 'vertical') => {
+        const updatedEdgeRelationships = [...this.state.edgeRelationships];
+        updatedEdgeRelationships[index] = relationshipType;
+        
+        this.setState({ edgeRelationships: updatedEdgeRelationships });
+      };
 
     handleAlgorithmChange = (newAlgorithm: string) => {
         console.log("Changing algorithm to:", newAlgorithm);
@@ -701,7 +769,6 @@ export class BaseMap extends React.Component<Props, State> {
     
     handleSetVertical = () => {
         this.setRestriction('vertical');
-        
     }
     
     updateEdgeCoordinates = () => {
@@ -1083,6 +1150,7 @@ export class BaseMap extends React.Component<Props, State> {
                     currentEdgeRestriction={this.state.selectedEdgeRestriction}
                     onOffsetChange={this.handleOffsetChange}
                     onAlgorithmChange={this.handleAlgorithmChange}
+                    onAutoRelationsChange ={this.toggleAutoRelations}
                 />
 
                 {this.state.showExportPolygonModal && (

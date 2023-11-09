@@ -40,13 +40,25 @@ const RadioButtonLabel = styled.label`
     }
 `;
 
+const CheckboxButton = styled.label`
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+
+    input {
+        margin-right: 10px;
+    }
+`
+
 export interface EdgeConstraintsBarProps {
     onSetHorizontal: (value: boolean) => void;
     onSetVertical: (value: boolean) => void;
     onRemoveConstraint: () => void;
     onOffsetChange: (isOffset: boolean) => void;
     currentEdgeRestriction: EdgeRestriction;
-    onAlgorithmChange: (algorithm: string) => void; 
+    onAlgorithmChange: (algorithm: string) => void;
+
+    onAutoRelationsChange: (isActive: boolean) => void;
 }
 
 export const EdgeConstraintsBar: FunctionComponent<EdgeConstraintsBarProps> = ({ 
@@ -55,7 +67,8 @@ export const EdgeConstraintsBar: FunctionComponent<EdgeConstraintsBarProps> = ({
     onRemoveConstraint, 
     currentEdgeRestriction, 
     onOffsetChange, 
-    onAlgorithmChange }) => {
+    onAlgorithmChange,
+    onAutoRelationsChange }) => {
 
     
     //const selectedEdgeHandle = currentEdgeRestriction === 'horizontal' ? 'horizontal' :
@@ -66,6 +79,14 @@ export const EdgeConstraintsBar: FunctionComponent<EdgeConstraintsBarProps> = ({
 
     const [activePolygon, setActivePolygon] = useState<string | null>(null);
     const [selectedAlgorithm, setSelectedAlgorithm] = useState<string>('library');
+
+    const [autoRelations, setAutoRelations] = useState<boolean>(false);
+
+    const handleAutoRelationsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const isChecked = e.target.checked;
+        setAutoRelations(isChecked);
+        onAutoRelationsChange(isChecked); 
+    }
 
     useEffect(() => {
         setSelectedEdge(currentEdgeRestriction);
@@ -159,7 +180,7 @@ export const EdgeConstraintsBar: FunctionComponent<EdgeConstraintsBarProps> = ({
                 Off
             </RadioButtonLabel>
 
-            <Title> Line Drawing</Title>
+            <Title>Line Drawing</Title>
             <RadioButtonLabel>
                 <input 
                 type="radio" 
@@ -180,6 +201,18 @@ export const EdgeConstraintsBar: FunctionComponent<EdgeConstraintsBarProps> = ({
                 />
                 Bresenham Algorithm
             </RadioButtonLabel>
+
+            <Title> New functionalities </Title>
+            <CheckboxButton>
+            <input 
+                type="checkbox" 
+                value="automatic-relations"
+                checked={autoRelations}
+                onChange={handleAutoRelationsChange}
+                name="automaticRelations"
+                />
+                Auto Relations
+            </CheckboxButton>
         </Container>
     );
 }
